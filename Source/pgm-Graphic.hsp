@@ -1,0 +1,906 @@
+; 初期変数
+x  = 0
+y  = 0
+xt = 0
+yt = 0
+marginA =  8
+marginB = 16
+pos_graphG = 0
+pos_graphA = 0
+pos_graphB = 0
+pos_graphC = 0
+pos_graphD = 0
+dim dat_graphG , 113
+dim dat_graphA , 113
+dim dat_graphB , 113
+dim dat_graphC , 113
+dim dat_graphD , 113
+menu_switch = 0
+menu_page = 1
+display_lampG = 0
+display_lampA = 0
+display_lampB = 0
+display_lampC = 0
+display_lampD = 0
+digit = 0
+sdim musicV_prev , 128
+sdim musicV_this , 128
+sdim musicV_next , 128
+scroll_bar = 0
+seek_bar = 0
+volL = 0
+volR = 0
+; 設定
+#define loadPicA(%1,%2)            bufferN = %1 : picV = %2 : gosub *makeRGBA
+#define loadPicB(%1,%2,%3,%4)      buffer %1 , %3,%4 : pos 0,0 : picload %2 : gsel 0
+#define setButtonA(%1,%2,%3,%4)    x = %1 : y = %2 : xt = %3 : yt = %4 :                        gosub *selectButton : gosub *drawButtonA
+#define setButtonB(%1,%2,%3,%4,%5) x = %1 : y = %2 : xt = %3 : yt = %4 : button_set = %5 :      gosub *selectButton : gosub *drawButtonB
+#define setButtonC(%1,%2,%3,%4)    x = %1 : y = %2 : xt = %3 : yt = %4 :                        gosub *selectButton : gosub *drawButtonC
+#define setButtonD(%1,%2,%3,%4,%5) x = %1 : y = %2 : xt = %3 : yt = %4 : button_variable = %5 : gosub *selectButton : gosub *drawButtonD
+#define setButtonE(%1,%2,%3,%4,%5) x = %1 : y = %2 : xt = %3 : yt = %4 : button_variable = %5 : gosub *selectButton : gosub *drawButtonE
+#define setButtonF(%1,%2,%3,%4,%5) x = %1 : y = %2 : xt = %3 : yt = %4 :                        gosub *selectButton : gosub *drawButtonF
+#define setDisplayLampA(%1,%2,%3)  x = %1 : y = %2 : lamp = %3 :                                gosub *drawDisplayLampA
+#define setDisplayLampB(%1,%2,%3)  x = %1 : y = %2 : lamp = %3 :                                gosub *drawDisplayLampB
+#define setDisplayLampC(%1,%2,%3)  x = %1 : y = %2 : lamp = %3 :                                gosub *drawDisplayLampC
+#define setIndention(%1,%2)        textA = %1 :      xt = %2 :                                  gosub *autosetIndention
+#define setMenuText(%1)            x = 16+2 : y = 120+2+%1*12 : xt = 264-5 : yt = 11 :          gosub *selectButton
+#define pi 3.14159265 ; (ﾟ∀ﾟ)o彡゜おっパイ！
+loadPicA 1 , "Texture/Main.png"               ; 本体
+loadPicB 2 , "Texture/ButtonA.png"  , 952,320 ; ボタン
+loadPicA 3 , "Texture/ButtonB.png"            ; つまみの印字
+loadPicA 4 , "Texture/ButtonC.png"            ; アプリケーション起動ボタン
+loadPicB 5 , "Texture/Display.png"  , 952,320 ; ディスプレイの素材
+loadPicB 8 , "Application.png"      , 624,248 ; ボタンのアイコン
+buffer   9 ,                          624,248 ; ボタンのアイコン(透過防止用)
+	pos 0,0 : gcopy 8 , 0,0 , 624,248
+	y = 0
+	repeat 248
+	x = 0
+	repeat 624
+		pget x,y
+		r = ginfo_r : g = ginfo_g : b = ginfo_b
+		r = r+double(255-r)*0.01 : r = int(r)
+		g = g+double(255-g)*0.01 : g = int(g)
+		b = b+double(255-b)*0.01 : b = int(b)
+		color r,g,b
+		pset x,y
+	x += 1
+	loop
+	y += 1
+	loop
+gsel 0
+
+goto *EoF_Graphic
+
+; 本体を描画
+*drawMain
+	gmode 1
+	pos   0,0
+	gcopy 1 , 0,0 , 952,320
+return
+; ボタンを描画
+*drawButton
+	; メニュー
+	setButtonA   8, 60 ,  40, 20
+	if action = 1 {
+		switch menu_switch
+			case 0 : gosub *openMenu  : swbreak
+			case 1 : gosub *closeMenu : swbreak
+		swend
+	}
+	; メニュー切り替えL
+	setButtonA 196,104 ,  40, 12
+	if action = 1 & menu_switch = 1 {
+		if menu_page >= 2 : menu_page -= 1 : gosub *setDisplayLamp
+	}
+	; メニュー切り替えR
+	setButtonA 240,104 ,  40, 12
+	if action = 1 & menu_switch = 1 {
+		if menu_page <= 2 : menu_page += 1 : gosub *setDisplayLamp
+	}
+	; スマートモード
+	setButtonA 600,144 ,  60, 16
+	setDisplayLampA   588,148 , smartmode
+	if action = 1 {
+		switch smartmode
+			case 0 : smartmode = 1 : swbreak
+			case 1 : smartmode = 0 : swbreak
+		swend
+	}
+	; 通常再生
+	setButtonB 304,172 ,  60, 24 , playmode_normal
+	if action = 1 {
+		shuffle = 0
+		playmode_normal = 1 : playmode_shuffle = 0
+	}
+	; シャッフル再生
+	setButtonB 368,172 ,  60, 24 , playmode_shuffle
+	if action = 1 {
+		shuffle = 1
+		playmode_normal = 0 : playmode_shuffle = 1
+	}
+	; リピート
+	setButtonB 448,172 ,  60, 24 , playmode_repeat
+	setDisplayLampB   496,180 , playmode_repeat
+	if action = 1 {
+		switch playmode_repeat
+			case 0 : playmode_repeat = 1 : swbreak
+			case 1 : playmode_repeat = 0 : swbreak
+		swend
+	}
+	; フェード
+	setButtonB 512,172 ,  60, 24 , playmode_fade
+	setDisplayLampB   560,180 , playmode_fade
+	if action = 1 {
+		switch playmode_fade
+			case 0 : playmode_fade = 1 : swbreak
+			case 1 : playmode_fade = 0 : swbreak
+		swend
+	}
+	MP3State
+	if stat = 0 & music_play = 1 & music_pause = 0 : gosub *autorunNextMusic
+	; 再生
+	setButtonB 368,232 ,  60, 40 , music_play
+	if action = 1 {
+		gosub *playMusic
+	}
+	; 一時停止
+	setButtonB 432,232 ,  60, 40 , music_pause
+	if action = 1 {
+		gosub *pauseMusic
+	}
+	; 停止
+	setButtonA 496,232 ,  40, 40
+	if action = 1 {
+		gosub *stopMusic
+	}
+	; 前へ・巻き戻し
+	setButtonC 304,232 ,  60, 40
+	if hold_action = 1 : gosub *runPrevMusic
+	if hold_action = 2 : gosub *runMusicRewind
+	if hold_action = 0 & music_rewind = 1 : gosub *setMusicRewind
+	; 次へ・早送り
+	setButtonC 540,232 ,  60, 40
+	if hold_action = 1 : gosub *runNextMusic
+	if hold_action = 2 : gosub *runMusicFForward
+	if hold_action = 0 & music_f_forward = 1 : gosub *setMusicFForward
+	; 音量
+	setButtonD 620,200 ,  80, 80 , music_vol
+	if select = 1 {
+		if wheel =  1 & music_vol < 100.00 : music_vol += 5.00
+		if wheel = -1 & music_vol >   0.00 : music_vol -= 5.00
+	}
+	if select_margin >= 1 & mouse_rotationA != 0 {
+		music_vol = rotation_valueB
+	}
+	if select = 1 | mouse_rotationB != 0 | wheel != 0 {
+		gosub *setMusicVol
+		music_vol_flag = 1
+	} else {
+		music_vol_flag = 0
+	}
+	; 音量バランス
+	setButtonE 752,216 ,  40, 40 , music_vol_balance
+	if select = 1 {
+		if wheel =  1 & music_vol_balance < 100.00 : music_vol_balance += 5.00
+		if wheel = -1 & music_vol_balance >   0.00 : music_vol_balance -= 5.00
+	}
+	if select_margin = 2 & mouse_rotationA != 0 {
+		music_vol_balance = rotation_valueB
+	}
+	if select = 1 | mouse_rotationA != 0 | wheel != 0 {
+		gosub *setMusicVolBalance
+		music_vol_flag = 1
+	} else {
+		music_vol_flag = 0
+	}
+	; 低音効果
+	setButtonE 812,216 ,  40, 40 , music_bass
+	if select = 1 {
+		if wheel =  1 : if music_bass < 100.00 : music_bass += 5.00
+		if wheel = -1 : if music_bass >   0.00 : music_bass -= 5.00
+	}
+	if select_margin = 2 & mouse_rotationA != 0 {
+		music_bass = rotation_valueB
+	}
+	if music_bass > 100.00 : music_bass = 100.00
+	if music_bass <   0.00 : music_bass =   0.00
+	; 高音効果
+	setButtonE 872,216 ,  40, 40 , music_treble
+	if select = 1 {
+		if wheel =  1 : if music_treble < 100.00 : music_treble += 5.00
+		if wheel = -1 : if music_treble >   0.00 : music_treble -= 5.00
+	}
+	if select_margin = 2 & mouse_rotationA != 0 {
+		music_treble = rotation_valueB
+	}
+	if music_treble > 100.00 : music_treble = 100.00
+	if music_treble <   0.00 : music_treble =   0.00
+	; 最終設定
+	if music_vol_flag = 1 & music_play = 1 {
+		if music_mute = 0 {
+			MP3SetVol int(music_volL),int(music_volR)
+		} else {
+			MP3SetVol 0,0
+		}
+	}
+	; アプリケーション
+	appX = 0
+	appY = 0
+	repeat 3
+	if app_page(appY) = 0 : appX = 0
+	if app_page(appY) = 1 : appX = 5
+	repeat 5
+		; アプリケーション(L)
+		if app_page(appY) = 0 {
+			setButtonA 708+44*appX          , 8+48*appY                 , 40 , 40
+			pos        708+44*(appX)+4      , 8+48*(appY)+4+select+hold
+			gcopy 9 ,  56+(32+24)*appX      , 24+(32+16)*appY           , 32 , 32
+			setButtonF 708+44*appX          , 8+48*appY                 , 40 , 40
+		}
+		; アプリケーション(R)
+		if app_page(appY) = 1 {
+			setButtonA 708+44*(appX-5)      , 8+48*appY                 , 40 , 40
+			pos        708+44*(appX-5)+4    , 8+48*(appY)+4+select+hold
+			gcopy 9 ,  344+(32+24)*(appX-5) , 24+(32+16)*appY           , 32 , 32
+			setButtonF 708+44*(appX-5)      , 8+48*appY                 , 40 , 40
+		}
+		if action = 1 {
+			memory_appY = appY
+			memory_appX = appX
+			memory_run_app = 1
+		}
+	appX += 1
+	loop
+	appY += 1
+	loop
+	q_appX = 0
+	repeat 4
+		; クイックアプリケーション
+		setButtonA 772+44*q_appX     , 152                 , 40 , 40
+		pos        772+44*(q_appX)+4 , 152+4+select+action
+		gcopy 9 ,  56+(32+24)*q_appX , 192                 , 32 , 32
+		setButtonF 772+44*q_appX     , 152                 , 40 , 40
+		if action = 1 {
+			memory_q_appX = q_appX
+			memory_run_q_app = 1
+		}
+	q_appX += 1
+	loop
+	setButtonA 688,  8 , 16,40 : if action = 1 : app_page(0) = 0 ; 移動ボタン 1L
+	setButtonA 928,  8 , 16,40 : if action = 1 : app_page(0) = 1 ; 移動ボタン 1R
+	setButtonA 688, 56 , 16,40 : if action = 1 : app_page(1) = 0 ; 移動ボタン 2L
+	setButtonA 928, 56 , 16,40 : if action = 1 : app_page(1) = 1 ; 移動ボタン 2R
+	setButtonA 688,104 , 16,40 : if action = 1 : app_page(2) = 0 ; 移動ボタン 3L
+	setButtonA 928,104 , 16,40 : if action = 1 : app_page(2) = 1 ; 移動ボタン 3R
+return
+; ボタンの型
+*drawButtonA
+	gmode 0
+	pos   x,y+select+hold
+	gcopy 2 , x,y , xt,yt
+return
+*drawButtonB
+	gmode 0
+	pos   x,y+select+(2*button_set)
+	gcopy 2 , x,y , xt,yt
+return
+*drawButtonC
+	gmode 0
+	pos   x,y+select+hold*2
+	gcopy 2 , x,y , xt,yt
+return
+*drawButtonD
+	r = 30
+	if select_margin >= 1 : gosub *commandMouseRotation
+	radian = ((-(button_variable/100)*(5.00/3.00))-(2.00/3.00))*pi
+	gmode 7
+	pos   x+38+cos(radian)*r,y+6+r-sin(radian)*r
+	gcopy 3 , 0,0 , 4,4
+return
+*drawButtonE
+	r = 15
+	if select_margin >= 1 : gosub *commandMouseRotation
+	radian = ((-(button_variable/100)*(5.00/3.00))-(2.00/3.00))*pi
+	gmode 7
+	pos   x+18+cos(radian)*r,y+4+r-sin(radian)*r
+	gcopy 3 , 0,0 , 4,4
+return
+*drawButtonF
+	gmode 7
+	pos   x,y+select+hold
+	gcopy 4 , 0,0 , xt,yt
+return
+*drawDisplayLampA
+	gmode 0
+	pos   x,y
+	gcopy 5 , 16,(lamp*8) , 8,8
+return
+*drawDisplayLampB
+	gmode 0
+	pos   x,y+select+(2*lamp)
+	gcopy 5 , 16,(lamp*8) , 8,8
+return
+*drawDisplayLampC
+	gmode 0
+	pos   x,y
+	gcopy 5 , 0,(lamp*8) , 16,8
+return
+; ボタンを選択
+*selectButton
+	select        = 0
+	select_margin = 0
+	action        = 0
+	hold          = 0
+	hold_action   = 0
+	if mousex >= x-marginB & mousex <= x+xt+marginB-1 & mousey >= y-marginB & mousey <= y+yt+marginB-1 : select_margin = 1
+	if mousex >= x-marginA & mousex <= x+xt+marginA-1 & mousey >= y-marginA & mousey <= y+yt+marginA-1 : select_margin = 2
+	if mousex >= x         & mousex <= x+xt-1         & mousey >= y         & mousey <= y+yt-1 {
+		select = 1
+		if click = 1 : action = 1
+		if click_flag  = 1 {
+			hold       = 1
+			hold_cnt  += 1
+			if hold_cnt <= 10 {
+				hold_type   = 1
+			} else {
+				hold_type   = 2
+				hold_action = 2
+			}
+		} else {
+			if hold_type = 1 : hold_action = 1
+			hold_type = 0
+			hold_cnt  = 0
+		}
+	}
+return
+; 時計を描画
+*drawClock
+	if draw_update = 0 {
+		gmode 0
+		pos       128,  8
+		gcopy 5 , 128,  8 , 160, 80
+	}
+	gosub *calcTime
+	gmode 0
+	if break_mode = 1 {
+		time_year = rnd(9999)
+		time_mon  = rnd(99)
+		time_week = rnd(7)
+		time_day  = rnd(99)
+		time_hour = rnd(99)
+		time_min  = rnd(99)
+		time_sec  = rnd(99)
+	}
+	repeat 4 ; 年
+		digit = cnt+1
+		time_value_year = time_year/powf(10,(digit-1)) - time_year/powf(10,digit)*10
+		pos   138+(14+2)*(-digit+4),12
+		gcopy 5 , 128+(14+2)*time_value_year,96 , 14,25
+	loop
+	repeat 2 ; 月
+		digit = cnt+1
+		time_value_mon = time_mon/powf(10,(digit-1)) - time_mon/powf(10,digit)*10
+		pos   209+(14+2)*(-digit+2),12
+		gcopy 5 , 128+(14+2)*time_value_mon,96 , 14,25
+	loop
+	switch time_week ; 曜日
+		case 0 : pos 135,40 : gcopy 5 , 128,124 ,  17,  7 : swbreak ; 日曜日
+		case 1 : pos 156,40 : gcopy 5 , 149,124 ,  19,  7 : swbreak ; 月曜日
+		case 2 : pos 179,40 : gcopy 5 , 172,124 ,  17,  7 : swbreak ; 火曜日
+		case 3 : pos 200,40 : gcopy 5 , 193,124 ,  19,  7 : swbreak ; 水曜日
+		case 4 : pos 223,40 : gcopy 5 , 216,124 ,  17,  7 : swbreak ; 木曜日
+		case 5 : pos 244,40 : gcopy 5 , 237,124 ,  15,  7 : swbreak ; 金玉キラキラ金曜日
+		case 6 : pos 263,40 : gcopy 5 , 256,124 ,  17,  7 : swbreak ; 土曜日
+	swend
+	repeat 2 ; 日
+		digit = cnt+1
+		time_value_day = time_day/powf(10,(digit-1)) - time_day/powf(10,digit)*10
+		pos 248+(14+2)*(-digit+2),12
+		gcopy 5 , 128+(14+2)*time_value_day,96 , 14,25
+	loop
+	repeat 2 ; 時
+		digit = cnt+1
+		time_value_hour = time_hour/powf(10,(digit-1)) - time_hour/powf(10,digit)*10
+		pos 137+(19+2)*(-digit+2),50
+		gcopy 5 , 128+(19+2)*time_value_hour,134 , 19,34
+	loop
+	repeat 2 ; 分
+		digit = cnt+1
+		time_value_min = time_min/powf(10,(digit-1)) - time_min/powf(10,digit)*10
+		pos 188+(19+2)*(-digit+2),50
+		gcopy 5 , 128+(19+2)*time_value_min,134 , 19,34
+	loop
+	repeat 2 ; 秒
+		digit = cnt+1
+		time_value_sec = time_sec/powf(10,(digit-1)) - time_sec/powf(10,digit)*10
+		pos 239+(19+2)*(-digit+2)    ,50
+		gcopy 5 , 128+(19+2)*time_value_sec,134 , 19,34
+	loop
+	if time_m_sec >= 500 { ; コロンの点滅
+		pos   181, 56
+		gcopy 1 , 181, 56 , 4,20
+		pos   231, 56
+		gcopy 1 , 231, 56 , 4,20
+	}
+return
+; ディスプレイAを描画
+*drawDisplayA
+	if draw_update = 0 & tick_update = 1 {
+		gmode 1
+		pos       16,120
+		gcopy 1 , 16,120 , 264,148
+	}
+	setDisplayLampC 16,108 , display_lampG
+	setDisplayLampA 36,108 , display_lampA
+	setDisplayLampA 48,108 , display_lampB
+	setDisplayLampA 60,108 , display_lampC
+	setDisplayLampA 72,108 , display_lampD
+	; CPU使用率を取得
+	if tick_update = 1 {
+		ratioA = GetIntCPU()
+		if break_mode = 1 : ratioA = rnd(100)
+		dat_graphA(pos_graphA) = ratioA/2-ratioA/50
+		pos_graphA++ : if(pos_graphA) >= length(dat_graphA) : pos_graphA = 0
+	}
+	graph_label = 1 : ratio = ratioA
+	repeat length(dat_graphA) : dat_graphG(cnt) = dat_graphA(cnt) : loop
+	pos_graphG = pos_graphA
+	x = 22 : y = (184-2)
+	gosub *drawGraph
+	; GPU使用率を取得
+	if tick_update = 1 {
+		ratioB = 0
+		if break_mode = 1 : ratioB = rnd(100)
+		dat_graphB(pos_graphB) = ratioB/2-ratioB/50
+		pos_graphB++ : if(pos_graphB) >= length(dat_graphB) : pos_graphB = 0
+	}
+	graph_label = 2 : ratio = ratioB
+	repeat length(dat_graphB) : dat_graphG(cnt) = dat_graphB(cnt) : loop
+	pos_graphG = pos_graphB
+	x = 151 : y = (184-2)
+	gosub *drawGraph
+	; RAM使用率を取得
+	if tick_update = 1 {
+		ratioC = sysinfo(33)
+		if break_mode = 1 : ratioC = rnd(100)
+		dat_graphC(pos_graphC) = ratioC/2-ratioC/50
+		pos_graphC++ : if(pos_graphC) >= length(dat_graphC) : pos_graphC = 0
+	}
+	graph_label = 3 : ratio = ratioC
+	repeat length(dat_graphC) : dat_graphG(cnt) = dat_graphC(cnt) : loop
+	pos_graphG = pos_graphC
+	x = 22 : y = (256-2)
+	gosub *drawGraph
+	; I/O使用率を取得
+	if tick_update = 1 {
+		ratioD = 0
+		if break_mode = 1 : ratioD = rnd(100)
+		dat_graphD(pos_graphD) = ratioD/2-ratioD/50
+		pos_graphD++ : if(pos_graphD) >= length(dat_graphD) : pos_graphD = 0
+	}
+	graph_label = 4 : ratio = ratioD
+	repeat length(dat_graphD) : dat_graphG(cnt) = dat_graphD(cnt) : loop
+	pos_graphG = pos_graphD
+	x = 151 : y = (256-2)
+	gosub *drawGraph
+return
+; ディスプレイAのグラフを描画
+*drawGraph
+	font font_main , 12 , 1
+	per_status = strf("%3d%%",ratio)
+	color 255,255,255
+	if graph_label != 4 { pos x+28,y-59 } else { pos x+63,y-59 }
+	if graph_label = 1 | graph_label = 3 : mes per_status
+	if graph_label = 2 | graph_label = 4 : mes "NULL"
+	n = pos_graphG
+	color 255,255,255
+	repeat length(dat_graphG)
+		boxf x,y , x,y-dat_graphG(n)-1
+		n++ : if(n) >= length(dat_graphG) : n = 0
+	x += 1
+	loop
+	x = 0 : y = 0
+return
+; ディスプレイBを描画
+*drawDisplayB
+	if draw_update = 0 {
+		gmode 1
+		pos       312, 16
+		gcopy 1 , 312, 16 , 348,116
+	}
+	font font_sub , 16
+	; 再生中のファイル名
+	if music_fileI >= 0 {
+		musicV_this = getpath(music_files(music_fileN),9)
+		if break_mode = 1 {
+			gosub *generateRandomString
+			musicV_this = random_string
+		}
+		setIndention musicV_this , 208
+		color 255,255,255
+		pos   348, 44
+		if strlen(musicV_this) <= 78+4 {
+			mes textB
+		} else {
+			mes strmid(textB,0,78) + "[…]"
+		}
+	}
+	font font_sub , 12
+	; 前に再生された音楽名
+	if music_fileN != 0 & music_fileI >= 0 {
+		musicV_prev = getpath(music_files(music_fileN-1),9)
+		if break_mode = 1 {
+			gosub *generateRandomString
+			musicV_prev = random_string
+		}
+		if playmode_shuffle = 0 { color 255,255,255 } else { color 63,63,63 }
+		pos 380,112
+		if strlen(musicV_prev) <= 34+4 {
+			mes musicV_prev
+		} else {
+			mes strmid(musicV_prev,0,34) + "[…]"
+		}
+	}
+	; 次に再生される音楽名
+	if music_fileN != music_fileI & music_fileI >= 0 {
+		musicV_next = getpath(music_files(music_fileN+1),9)
+		if break_mode = 1 {
+			gosub *generateRandomString
+			musicV_next = random_string
+		}
+		if playmode_shuffle = 0 { color 255,255,255 } else { color 63,63,63 }
+		pos 380, 24
+		if strlen(musicV_next) <= 34+4 {
+			mes musicV_next
+		} else {
+			mes strmid(musicV_next,0,34) + "[…]"
+		}
+	}
+	; スクロールバー
+	if music_fileI != 0 {
+		scroll_bar = double(music_fileN)/double(music_fileI)
+		pos   331,40+(68.00-10.00)*scroll_bar
+		gcopy 5 , 331,40 , 3,10
+	}
+	; 再生時間を描画
+	gosub *getMusicPlayTime
+	if music_play != 0 | music_pause != 0 {
+		if music_fileI != -1 {
+			gmode 0
+			pos   348, 98
+			gcopy 5 , 348, 98 ,  47,  9
+			if break_mode = 1 {
+				music_play_time_hour = rnd(99)
+				music_play_time_min  = rnd(99)
+				music_play_time_sec  = rnd(99)
+			}
+			repeat 2
+				digit = cnt+1
+				music_play_time_value_hour = music_play_time_hour/powf(10,(digit-1)) - music_play_time_hour/powf(10,digit)*10
+				pos   348+6*(-digit+2),98
+				gcopy 5 , 348+6*music_play_time_value_hour,87 , 6,9
+			loop
+			repeat 2
+				digit = cnt+1
+				music_play_time_value_min  = music_play_time_min /powf(10,(digit-1)) - music_play_time_min /powf(10,digit)*10
+				pos   366+6*(-digit+2),98
+				gcopy 5 , 348+6*music_play_time_value_min ,87 , 6,9
+			loop
+			repeat 2
+				digit = cnt+1
+				music_play_time_value_sec  = music_play_time_sec /powf(10,(digit-1)) - music_play_time_sec /powf(10,digit)*10
+				pos   384+6*(-digit+2),98
+				gcopy 5 , 348+6*music_play_time_value_sec ,87 , 6,9
+			loop
+		}
+	}
+	; 終了時間を描画
+	gosub *getMusicLengthTime
+	if music_play != 0 | music_pause != 0 {
+		if music_fileI != -1 {
+			gmode 0
+			pos   564, 98
+			gcopy 5 , 348, 98 ,  47,  9
+			if break_mode = 1 {
+				music_length_time_hour = rnd(99)
+				music_length_time_min  = rnd(99)
+				music_length_time_sec  = rnd(99)
+			}
+			repeat 2
+				digit = cnt+1
+				music_length_time_value_hour = music_length_time_hour/powf(10,(digit-1)) - music_length_time_hour/powf(10,digit)*10
+				pos   564+6*(-digit+2),98
+				gcopy 5 , 348+6*music_length_time_value_hour,87 , 6,9
+			loop
+			repeat 2
+				digit = cnt+1
+				music_length_time_value_min  = music_length_time_min /powf(10,(digit-1)) - music_length_time_min /powf(10,digit)*10
+				pos   582+6*(-digit+2),98
+				gcopy 5 , 348+6*music_length_time_value_min ,87 , 6,9
+			loop
+			repeat 2
+				digit = cnt+1
+				music_length_time_value_sec  = music_length_time_sec /powf(10,(digit-1)) - music_length_time_sec /powf(10,digit)*10
+				pos   600+6*(-digit+2),98
+				gcopy 5 , 348+6*music_length_time_value_sec ,87 , 6,9
+			loop
+		}
+	}
+	; シークできないバーを描画
+	if music_length_time_com != 0 : seek_bar = (double(music_play_time_com)/double(music_length_time_com))*100
+	if break_mode = 1 : seek_bar = rnd(100)
+	if music_play != 0 | music_pause != 0 & seek_bar <= 100 {
+		pos   400,100
+		gcopy 5 , 400,100 , 1.6*seek_bar,4
+//		gcopy 5 , 400,100 , 16*(seek_bar/10),4
+	}
+	; サウンドビジュアライザーを描画
+	volL  = music_vol*((100.00-music_vol_balance)/100.00)
+	volR  = music_vol*((       music_vol_balance)/100.00)
+	volLY = volL*0.80
+	volRY = volR*0.80
+	pos   624,128-volLY
+	gcopy 5 , 624,128-volLY , 12,volLY
+	pos   640,128-volRY
+	gcopy 5 , 640,128-volRY , 12,volRY
+	; アルバムを描画
+	color 17,17,17 : boxf 564,44 , 564+47,44+47
+	if music_fileI != -1 {
+		gmode 0
+		if exist_album_art = 1 {
+			pos   564,44
+			gcopy 7 , 0,0 , 48,48
+		} else {
+			pos   564,44
+			gcopy 5 , 564,44 , 48,48
+		}
+	} else {
+		repeat rnd(10)
+			noise = rnd(47)
+			color 255,255,255
+			line  563,44+noise , 611,44+noise
+		loop
+	}
+return
+; メニューを描画
+*drawMenu
+	l  =  12
+	x  =  16
+	y  = 120
+	xt = 264
+	yt = 148
+	color 16,16,16
+	pos   x,y
+	gcopy 5 , 672, 16 , 264,148
+	n = 0
+	repeat l
+		setMenuText n
+		if select = 1 {
+			color 63,63,63
+			boxf x,y , x+xt,y+yt
+		}
+		if action = 1 {
+			color 127,127,127
+			boxf  x,y , x+xt,y+yt
+			if menu_page = 1 {
+				if n = 10 {
+					gosub *chooseMusicFolder
+					gosub *closeMenu
+					hold_type = 0
+				}
+				if n = 11 : gosub *deleteFolderHistory
+				if n >= 0 & n <= 9 {
+					if folder_history(n) != "" {
+						music_folderP = folder_history(n)
+						gosub *addMusicFile
+						gosub *closeMenu
+						hold_type = 0
+					}
+				}
+			}
+			if menu_page = 2 {
+				if n = 0 {
+					switch music_mute
+						case 0 : music_mute = 1 : swbreak
+						case 1 : music_mute = 0 : swbreak
+					swend
+					if music_mute = 0 {
+						MP3SetVol int(music_volL),int(music_volR)
+					} else {
+						MP3SetVol 0,0
+					}
+				}
+				if n = 1 {
+					if fps != 60 & fps != 30 & fps != 15 {
+						if fps >= 60 {
+							fps = 60
+						} else {
+							if fps >= 30 {
+								fps = 30
+							} else {
+								fps = 15
+							}
+						}
+					}
+					switch fps
+						case 15 : fps = 30 : swbreak
+						case 30 : fps = 60 : swbreak
+						case 60 : fps = 15 : swbreak
+					swend
+				}
+				if n = 2 {
+					switch seek_speed
+						case 1 : seek_speed = 2 : swbreak
+						case 2 : seek_speed = 4 : swbreak
+						case 4 : seek_speed = 8 : swbreak
+						case 8 : seek_speed = 1 : swbreak
+					swend
+				}
+				if n = 3 {
+					switch leave_music_folder_history
+						case 0 : leave_music_folder_history = 1 : swbreak
+						case 1 : leave_music_folder_history = 0 : swbreak
+					swend
+				}
+				if n = 4 {
+					switch break_mode
+						case 0 : break_mode = 1 : swbreak
+						case 1 : break_mode = 0 : swbreak
+					swend
+				}
+			}
+			if menu_page = 3 {
+				if n = 0 {
+					pos_graphG = 0
+					pos_graphA = 0
+					pos_graphB = 0
+					pos_graphC = 0
+					pos_graphD = 0
+					dim dat_graphG , 113
+					dim dat_graphA , 113
+					dim dat_graphB , 113
+					dim dat_graphC , 113
+					dim dat_graphD , 113
+				}
+				if n =  2 : gosub *saveConfigA
+				if n =  3 : gosub *openConfig
+				if n =  4 : goto  *importConfig
+				if n =  5 : goto  *exportConfig
+				if n =  7 : exec  dirP , 16
+				if n =  8 : gosub *runSAE
+				if n = 10 : exec "https://github.com/SomethingOnu/DeskDeck" , 16
+				if n = 11 : exec "https://somethingonu.github.io" , 16
+			}
+			if menu_page = 4 {
+			}
+		}
+		n += 1
+	loop
+	; テキストを描画
+	l  =  12
+	x  =  16
+	y  = 120
+	xt = 264
+	yt = 148
+	font font_main , 12
+	pos  x+2,y+2
+	if menu_page = 1 {
+		n = 0
+		repeat l-2
+			if folder_history(n) = "" {
+				color 127,127,127
+				mes "・Music " + n + " … " + "NONE"
+			} else {
+				color 255,255,255
+				buf = getpath(folder_history(n),9)
+				if strlen(buf) <= 26+4 {
+					mes "・Music " + n + " … " + buf
+				} else {
+					mes "・Music " + n + " … " + strmid(buf,0,26) + "[…]"
+				}
+			}
+			n += 1
+		loop
+		color 255,255,255
+		mes "・Choose Music Folder"
+		mes "・Delete Music History"
+	}
+	if menu_page = 2 {
+		color 255,255,255
+		if music_mute = 0 : mes "・Mute -------------> OFF"
+		if music_mute = 1 : mes "・Mute -------------> ON"
+		mes "・FPS --------------> " + fps
+		mes "・Seek Speed -------> " + seek_speed + "s/fps"
+		if leave_music_folder_history = 0 : mes "・Memory History ---> OFF"
+		if leave_music_folder_history = 1 : mes "・Memory History ---> ON"
+		if break_mode = 0 : mes "・Break Mode -------> OFF"
+		if break_mode = 1 : mes "・Break Mode -------> ON"
+		mes ""
+		mes ""
+		mes ""
+		mes ""
+		mes ""
+		mes ""
+		mes ""
+	}
+	if menu_page = 3 {
+		color 255,255,255
+		mes "・Reset the System Graph"
+		mes ""
+		mes "・Save Config Now"
+		mes "・Open Config"
+		mes "・Import Config"
+		mes "・Export Config"
+		mes ""
+		mes "・Open Current Folder"
+		mes "・Set Application Editor"
+		mes ""
+		mes "　                          Desk Deck " + version
+		mes "　                 Created by Something Onu"
+	}
+	if menu_page = 4 {
+		color 255,255,255
+		mes ""
+		mes ""
+		mes ""
+		mes ""
+		mes ""
+		mes ""
+		mes ""
+		mes ""
+		mes ""
+		mes ""
+		mes ""
+		mes ""
+	}
+return
+; メニューを開ける
+*openMenu
+	menu_switch = 1
+	gosub *setDisplayLamp
+return
+; メニューを閉じる
+*closeMenu
+	menu_switch = 0
+	display_lampA = 0
+	display_lampB = 0
+	display_lampC = 0
+	display_lampD = 0
+return
+; ランプを再配置する
+*setDisplayLamp
+	if test_key = 0 {
+		display_lampA = 0
+		display_lampB = 0
+		display_lampC = 0
+		display_lampD = 0
+		if menu_page = 1 : display_lampA = 1
+		if menu_page = 2 : display_lampB = 1
+		if menu_page = 3 : display_lampC = 1
+		if menu_page = 4 : display_lampD = 1
+	}
+return
+; Desk Deckを閉じる
+*closeMain
+	x = 0
+	y = 0
+	sizeX = 952
+	sizeY =   8
+	repeat WinY/sizeY
+		repeat WinX/sizeX
+			redraw 0
+			pos x,y
+			color 0,0,0
+			boxf x,y , x+sizeX,y+sizeY
+			gosub *transparentBackground
+			x += sizeX
+			await 25
+			redraw 1
+		loop
+		x  = 0
+		y += sizeY
+	loop
+return
+
+*EoF_Graphic

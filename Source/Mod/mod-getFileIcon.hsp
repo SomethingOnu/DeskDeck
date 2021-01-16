@@ -1,0 +1,12 @@
+#include "user32.as"
+#include "shell32.as"
+
+#define SHGFI_ICON        $00000100
+#define SHGFI_TYPENAME    $00000400
+#define SHGFI_LARGEICON   $00000000 ; x32サイズ
+#define SHGFI_SMALLICON   $00000001 ; x16サイズ
+#define SHGFI_LINKOVERLAY $00008000 ; ショートカットアイコン
+#define SHGFI_SELECTED    $0010000  ; 選択状態アイコン
+
+dim SHFILEINFO , 88
+sdim filetype , 80

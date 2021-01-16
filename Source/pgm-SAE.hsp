@@ -1,0 +1,380 @@
+; パスモード
+path_mode = 0
+if path_mode = 1 {
+	dirP = "A:/Work/Software/Utility - Desk Deck/Source"
+	delete "hsptmp"
+	delete "obj"
+} else {
+	dirP = dir_exe
+}
+chdir dirP
+; データ
+*Reset
+title_name = "Desk Deck (Set Application Editor)"
+version = "1.0.0"
+#packopt name "Desk Deck (Set Application Editor)"
+#packopt icon "bin-IconSAE.ico"
+#pack "pgm-SAE.hsp"
+font_name = "ＭＳ ゴシック"
+randomize
+winX = 624
+winY = 248+128
+posX = (ginfo_dispx-winX)/2
+posY = (ginfo_dispy-winY)/2
+screen 0 , winX,winY , 0 , posX,posY
+title "" + title_name + " " + version
+font font_name , 16
+setup = 1
+#include "Mod/mod-waitFPS.hsp"
+#include "Mod/mod-getFileIcon.hsp"
+#include "Mod/mod-testGDI+.hsp"
+#include "pgm-inputKey.hsp"
+; 初期変数
+reset_flag = 0
+x  = 0
+y  = 0
+xt = 0
+yt = 0
+fps = 30 : fps_config fps
+sdim application       , 128 , 3,10
+sdim quick_application , 128 , 4
+memory_run_app   = 0
+memory_run_q_app = 0
+dim app_page , 3
+appX   = 0 : select_appX   = 0
+appY   = 0 : select_appY   = 0
+q_appX = 0 : select_q_appX = 0
+dummy = ""
+sdim imageP , 128
+select_image        = 0
+select_app_type     = 0
+image_zoom          = 0
+image_zoom_mes      = "24x24"
+image_zoom_type     = 0
+image_zoom_type_mes = "標準"
+; コンフィグ
+#include "pgm-Config.hsp"
+gosub *checkConfig
+gosub *loadConfigB
+; 設定
+buffer 1 , 784,312
+	picload "Application.png" ; ボタンのアイコン
+gsel 0
+; ルート
+gosub *drawObject
+status = "準備ができた！"
+*Main
+	redraw 0
+	color 0,0,0 : boxf
+	gmode 0 : pos 0,0  : gcopy 1 , 0,0 , 624,248
+	gosub *commandClick
+	gosub *selectIndex
+	gosub *pickIndex
+	color 127,127,127 : pos 16,347 : mes status
+	fps_wait
+	redraw 1
+goto *Main
+; オブジェクトを描画
+*drawObject
+	clrobj
+	if select_app_type = 0 {
+		pos 128,286+1
+		input dummy , 224-1,18 , 1024
+		pos 128,310+1
+		input dummy , 352-1,18 , 1024
+	}
+	if select_app_type = 1 {
+		pos 128,286+1
+		input imageP , 224-1,18 , 1024
+		pos 128,310+1
+		input applicant_application(select_appY,select_appX) , 352-1,18 , 1024
+	}
+	if select_app_type = 2 {
+		pos 128,286+1
+		input imageP , 224-1,18 , 1024
+		pos 128,310+1
+		input applicant_quick_application(select_q_appX) , 352-1,18 , 1024
+	}
+	pos 352,286
+	objsize 64,20
+	button "参照" , *selectImageP
+	pos 416,286
+	objsize 64,20
+	button image_zoom_mes , *changeImageZoom
+	pos 480,286
+	objsize 64,20
+	button image_zoom_type_mes , *changeImageZoomType
+	pos 544,286
+	objsize 64,20
+	button "確定" , *confirmImageP
+	pos 480,310
+	objsize 64,20
+	button "参照" , *selectFileP
+	pos 544,310
+	objsize 64,20
+	button "確定" , *confirmFileP
+	pos 544,342
+	objsize 64,20
+	button "保存" , *saveConfigB
+	pos 480,342
+	objsize 64,20
+	button "破棄" , *discardConfig
+return
+; 対象を選択
+*selectIndex
+	appX = 0
+	appY = 0
+	repeat 3
+		repeat 10
+			if appX >= 0 & appX <= 4 {
+				x = 56+(32+24)*appX
+				y = 24+(32+16)*appY
+			}
+			if appX >= 5 & appX <= 9 {
+				x = 344+(32+24)*(appX-5)
+				y = 24+(32+16)*appY
+			}
+			xt = 32
+			yt = 32
+			app_type = 1
+			gosub *checkIndex
+			gosub *drawSelect
+			if action = 1 {
+				select_appY = appY
+				select_appX = appX
+				applicant_application(select_appY,select_appX) = application(select_appY,select_appX)
+				select_app_type = 1
+				imageP = ""
+				select_image = 0
+				status = "対象を選択した！"
+				gosub *drawObject
+			}
+			appX += 1
+		loop
+		appX = 0
+		appY += 1
+	loop
+	q_appX = 0
+	repeat 4
+		x = 56+(32+24)*q_appX
+		y = 192
+		xt = 32
+		yt = 32
+		app_type = 2
+		gosub *checkIndex
+		gosub *drawSelect
+		if action = 1 {
+			select_q_appX = q_appX
+			applicant_quick_application(select_q_appX) = quick_application(select_q_appX)
+			select_app_type = 2
+			imageP = ""
+			select_image = 0
+			status = "対象を選択した！"
+			gosub *drawObject
+		}
+		q_appX += 1
+	loop
+	x = 0 : y = 0 : xt = 0  : yt = 0
+return
+*checkIndex
+	select = 0
+	action = 0
+	if mousex >= x & mousex <= x+xt & mousey >= y & mousey <= y+yt {
+		select = 1
+		if click = 1 : action = 1
+	}
+return
+*pickIndex
+	color 239,239,239
+	boxf  0,248 , 624,248+128
+	color 223,223,223
+	boxf  93,285 , 610,330
+	color 0,0,0
+	boxf  14-1,262-1 , 14+68,262+68
+	color 255,255,255
+	boxf  15-1,263-1 , 15+66,263+66
+	pos   16,264
+	if select_app_type = 1 {
+		if select_appX >= 0 & select_appX <= 4 : gzoom 64,64 , 1 , 56+(32+24)*select_appX,24+(32+16)*select_appY , 32,32
+		if select_appX >= 5 & select_appX <= 9 : gzoom 64,64 , 1 , 344+(32+24)*(select_appX-5),24+(32+16)*select_appY , 32,32
+	}
+	if select_app_type = 2 {
+		gzoom 64,64 , 1 , 56+(32+24)*select_q_appX,192 , 32,32
+	}
+	if select_image = 1 : gzoom 64,64 , 3 , 0,0 , 32,32 , 0
+	font font_name , 12 , 1
+	if select_app_type != 0 {
+		color 0,0,0
+		pos 96,264
+		if select_app_type = 1 : mes "Application (" + select_appY + "," + select_appX + ")"
+		if select_app_type = 2 : mes "Quick Application (" + select_q_appX + ")"
+	}
+	font font_name , 12
+	color 0,0,0
+	pos   96,288+2
+	mes   "画像"
+	pos   96,312+2
+	mes   "パス"
+return
+; 選択を描画
+*drawSelect
+	yl = 11
+	if select = 1 {
+		color 255,255,255
+		boxf  x-yl-2+action,y-yl-2+action , x+xt+yl+1-action,y+yt+yl+1-action
+		color 255,0,0
+		boxf  x-yl-1+action,y-yl-1+action , x+xt+yl-action,y+yt+yl-action
+		color 255,255,255
+		boxf  x,y , x+xt,y+yt
+		pos   x-8+action,y-8+action
+		if app_type = 1 {
+			if appX >= 0 & appX <= 4 : gzoom 48-2*action,48-2*action , 1 , 56+(32+24)*appX,24+(32+16)*appY , 32,32 , 1
+			if appX >= 5 & appX <= 9 : gzoom 48-2*action,48-2*action , 1 , 344+(32+24)*(appX-5),24+(32+16)*appY , 32,32 , 1
+		}
+		if app_type = 2 {
+			gzoom 48-2*action,48-2*action , 1 , 56+(32+24)*q_appX,192 , 32,32 , 1
+		}
+	}
+	x = 0 : y = 0 : xt = 0  : yt = 0
+return
+; ファイルパスを取得
+*selectFileP
+	if select_app_type != 0 {
+		dialog "exe" , 16
+		if refstr != "" {
+			if select_app_type = 1 : applicant_application(select_appY,select_appX) = refstr
+			if select_app_type = 2 : applicant_quick_application(select_q_appX)     = refstr
+			gosub *drawObject
+			status = "ファイルパスを選択した！"
+		}
+	} else {
+		status = "対象が選択されていない！"
+	}
+goto *Main
+; ファイルパスを確定
+*confirmFileP
+	if select_app_type != 0 {
+		if select_app_type = 1 : application(select_appY,select_appX) = applicant_application(select_appY,select_appX)
+		if select_app_type = 2 : quick_application(select_q_appX)     = applicant_quick_application(select_q_appX)
+		gosub *drawObject
+		status = "ファイルパスを変更した！"
+	} else {
+		status = "対象が選択されていない！"
+	}
+goto *Main
+; 画像を取得
+*selectImageP
+	if select_app_type != 0 {
+		dialog "png;*.jpg;*.gif;*.bmp;*.exe" , 16 , "アイコンファイル"
+		if refstr != "" {
+			imageP = refstr
+			select_image = 1
+			if getpath(imageP,2) = ".exe" {
+				SHGetFileInfo refstr , 0 , varptr(SHFILEINFO) , $160 , SHGFI_ICON | SHGFI_TYPENAME
+				buffer 2
+					DrawIcon hdc , 0,0 , SHFILEINFO(0)
+					DestroyIcon SHFILEINFO(0)
+					PicX = 32
+					PicY = 32
+					gsel 0
+			} else {
+				buffer 2
+					picload imageP
+					PicX = ginfo_winx
+					PicY = ginfo_winy
+					gsel 0
+			}
+			gosub *drawImage
+			gosub *drawObject
+			status = "画像を選択した！"
+		}
+	} else {
+		status = "対象が選択されていない！"
+	}
+goto *Main
+; 画像を描画
+*drawImage
+	if select_image = 1 {
+		buffer 3 , 32,32
+			if image_zoom = 0 {
+				pos   4,4
+				gzoom 24,24 , 2 , 0,0 , PicX,PicY , image_zoom_type
+			}
+			if image_zoom = 1 {
+				pos   0,0
+				gzoom 32,32 , 2 , 0,0 , PicX,PicY , image_zoom_type
+			}
+			gsel 0
+	}
+return
+; 画像のサイズ(24x24・32x32)を変更
+*changeImageZoom
+	switch image_zoom
+		case 0
+			image_zoom = 1
+			image_zoom_mes = "32x32"
+			status = "画像のサイズは32x32だ！"
+		swbreak
+		case 1
+			image_zoom = 0
+			image_zoom_mes = "24x24"
+			status = "画像のサイズは24x24だ！"
+		swbreak
+	swend
+	gosub *drawImage
+	gosub *drawObject
+goto *Main
+; 画像のサイズ効果(標準・アンチエイリアス)を変更
+*changeImageZoomType
+	switch image_zoom_type
+		case 0
+			image_zoom_type = 1
+			image_zoom_type_mes = "綺麗"
+			status = "画像のリサイズモードはアンチエイリアスを掛けた状態だ！"
+		swbreak
+		case 1
+			image_zoom_type = 0
+			image_zoom_type_mes = "標準"
+			status = "画像のリサイズモードは標準状態だ！"
+		swbreak
+	swend
+	gosub *drawImage
+	gosub *drawObject
+goto *Main
+; 画像を確定
+*confirmImageP
+	if select_app_type != 0 {
+		if select_app_type = 1 {
+			if select_appX >= 0 & select_appX <= 4 {
+				x = 56+(32+24)*select_appX
+				y = 24+(32+16)*select_appY
+			}
+			if select_appX >= 5 & select_appX <= 9 {
+				x = 344+(32+24)*(select_appX-5)
+				y = 24+(32+16)*select_appY
+			}
+		}
+		if select_app_type = 2 {
+			x = 56+(32+24)*select_q_appX
+			y = 192
+		}
+		if select_image = 1 {
+			buffer 4 , 784,312
+				pos   0,0
+				gcopy 1 , 0,0 , 624,248
+				gsel 0
+			buffer 1 , 784,312
+				pos   0,0
+				gcopy 4 , 0,0 , 624,248
+				pos   x,y
+				gcopy 3 , 0,0 , 32,32
+				gsel 0
+			status = "画像を変更した！"
+		} else {
+			status = "画像が選択されていない！"
+		}
+	} else {
+		status = "対象が選択されていない！"
+	}
+	x = 0 : y = 0
+goto *Main

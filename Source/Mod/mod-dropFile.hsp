@@ -1,0 +1,43 @@
+#uselib "shell32.dll"
+#cfunc DragQueryFileX   "DragQueryFile"   int,int,sptr,int
+#func  DragAcceptFilesX "DragAcceptFiles" int,int
+#func  DragFinishX      "DragFinish"      int
+
+; 初期変数
+sdim s , 128
+sdim drop_music_folderP , 128 , 1
+ret = -1
+; 設定
+#define WM_DROPFILES 0x0233
+
+goto *EoF_dropFile
+
+; ドラッグ＆ドロップの検出
+*getFileStatus
+	DragAcceptFilesX hwnd , 1
+	oncmd gosub *dropFile , WM_DROPFILES
+return
+; ドラッグ＆ドロップ
+*dropFile
+	ret = DragQueryFileX(wparam,-1,varptr(s),256)
+	if ret != -1 {
+		sdim s , 128
+		sdim drop_music_folderP , 128 , ret
+		repeat ret
+			ret = DragQueryFileX(wparam,cnt,varptr(s),256)
+			drop_music_folderP(cnt) = s
+		loop
+		if getpath(drop_music_folderP(0),2) = ".mp3" {
+			select_music_file = getpath(drop_music_folderP(0),8)
+			music_folderP = getpath(drop_music_folderP(0),32)
+			music_folderP = strmid(music_folderP,0,strlen(music_folderP)-1)
+		} else {
+			music_folderP = drop_music_folderP(0)
+			select_music_file = ""
+		}
+		gosub *addMusicFile
+	}
+	DragFinishX wparam
+return
+
+*EoF_dropFile

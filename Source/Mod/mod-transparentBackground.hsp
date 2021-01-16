@@ -1,0 +1,46 @@
+#include "KexWin.as"
+
+#uselib "user32.dll"
+#func GetWindowLongA "GetWindowLongA"             int,int
+#func SetWindowLongA "SetWindowLongA"             int,int,int
+#func SetLayered     "SetLayeredWindowAttributes" int,int,int,int
+#func SendMessageA   "SendMessageA"               int,int,int,int
+#func PostMessageA   "PostMessageA"               int,int,int,int
+#func SetCapture     "SetCapture"                 int
+#func ReleaseCapture "ReleaseCapture"
+
+; オプション
+snap_windowX1  =  32
+snap_windowY1  = 308
+snap_windowXT1 =  96
+snap_windowYT1 =  12
+snap_windowX2  = 824
+snap_windowY2  = 308
+snap_windowXT2 =  96
+snap_windowYT2 =  12
+; 初期変数
+move_window_flag = 0
+
+goto *EoF_transparentBackground
+
+; 背景色(0,0,0)を透過
+*transparentBackground
+	GetWindowLongA hwnd , -20
+	SetWindowLongA hwnd , -20 , stat | 0x00080000
+	SetLayered hwnd , 0 , 0 , 1 ; 黒色(0x000000)を透過
+return
+; 左クリック時にウィンドウを移動
+*moveWindow
+	if mousex >= snap_windowX1 & mousex <= snap_windowX1+snap_windowXT1 & mousey >= snap_windowY1 & mousey <= snap_windowY1+snap_windowYT1 : move_window_flag += 1
+	if mousex >= snap_windowX2 & mousex <= snap_windowX2+snap_windowXT2 & mousey >= snap_windowY2 & mousey <= snap_windowY2+snap_windowYT2 : move_window_flag += 1
+	if move_window_flag != 0 {
+		// WM_NCLBUTTONDOWN(0x00a1) HTCAPTION(0x02)
+		PostMessageA hwnd , 0x00a1 , 0x02 , lparam
+		SysCur 9
+	} else {
+		SysCur 0
+	}
+	move_window_flag = 0
+return
+
+*EoF_transparentBackground

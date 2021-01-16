@@ -1,0 +1,27 @@
+; オプション
+random_stringI = 25               ; 生成する乱数の長さ
+generate_random_string_length = 1 ; 0:指定した長さの乱数を生成する / 1:指定した長さ以下の乱数を生成する
+; 初期変数
+sdim random_string , random_stringI
+
+goto *EoF_generateRandomString
+
+; ランダムな文字列を生成する
+*generateRandomString
+	random_string = ""
+	if generate_random_string_length = 0 {
+		n = random_stringI
+	} else {
+		n = rnd(random_stringI)
+	}
+	repeat n
+		stringA = 33 + rnd(255-33)
+		stringB = 33 + rnd(255-33)
+		if stringA = 92 | stringA = 110 : stringA = stringA+1
+		if stringB = 92 | stringB = 110 : stringB = stringB+1
+		poke random_string , cnt*2   , stringA
+		poke random_string , cnt*2+1 , stringB
+	loop
+return
+
+*EoF_generateRandomString

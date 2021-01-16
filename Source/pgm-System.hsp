@@ -1,0 +1,75 @@
+goto *EoF_System
+
+; アプリケーションを開く
+*runApplication
+	memory_run_app = 0
+	if application(memory_appY,memory_appX) != "" {
+		ex = getpath(application(memory_appY,memory_appX),2) : ex = strmid(ex,0,4)
+		if ex = ".exe" { app_type = 0 } else { app_type = 1 }
+		if app_type =  0 {
+			exist getpath(application(memory_appY,memory_appX),1)+".exe"
+			if strsize != -1 {
+				exec application(memory_appY,memory_appX) , 0
+			} else {
+				exist dirP+getpath(application(memory_appY,memory_appX),1)+".exe"
+				if strsize != -1 {
+					exec dirP+application(memory_appY,memory_appX) , 0
+				} else {
+					dialog "["+memory_appX+","+memory_appY+"]\nファイルが存在しません！" , 1 , "起動エラー"
+				}
+			}
+		}
+		if app_type = 1 {
+			exec application(memory_appY,memory_appX) , 16
+		}
+	} else {
+		dialog "["+memory_appX+","+memory_appY+"]\nパスが空白です！" , 1 , "起動エラー"
+	}
+	action = 0
+return
+; クイック・アプリケーションを開く
+*runQuickApplication
+	memory_run_q_app = 0
+	if quick_application(memory_q_appX) != "" {
+		ex = getpath(quick_application(memory_q_appX),2) : ex = strmid(ex,0,4)
+		if ex = ".exe" { app_type = 0 } else { app_type = 1 }
+		if app_type =  0 {
+			exist getpath(quick_application(memory_q_appX),1)+".exe"
+			if strsize != -1 {
+				exec quick_application(memory_q_appX) , 0
+			} else {
+				exist dirP+getpath(quick_application(memory_q_appX),1)+".exe"
+				if strsize != -1 {
+					exec dirP+quick_application(memory_q_appX) , 0
+				} else {
+					dialog "["+memory_q_appX+"]\nファイルが存在しません！" , 1 , "起動エラー"
+				}
+			}
+		}
+		if app_type = 1 {
+			exec quick_application(memory_q_appX) , 16
+		}
+	} else {
+		dialog "["+memory_q_appX+"]\nパスが空白です！" , 1 , "起動エラー"
+	}
+	action = 0
+return
+; 設定を保存して終了
+*offPowerA
+	gosub *saveConfigA
+	MP3Stop
+	MP3Close
+	MP3Clean
+	gosub *closeMain
+end
+; 設定を保存して終了(エラー発生)
+*offPowerB
+	gosub *saveConfigA
+	MP3Stop
+	MP3Close
+	MP3Clean
+	PdhCloseQuery hQuery
+	dialog "" + lparam + "行でエラー" + wparam + "が発生しました"
+end
+
+*EoF_System

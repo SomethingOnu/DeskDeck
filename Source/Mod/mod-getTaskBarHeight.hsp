@@ -1,0 +1,9 @@
+#uselib "user32.dll"
+
+#func FindWindow    "FindWindowA"   str,int
+#func GetWindowRect "GetWindowRect" int,int
+
+dim RECT, 4
+FindWindow "shell_traywnd"
+GetWindowRect stat,varptr (RECT)
+taskbarH = RECT.3 - RECT.1

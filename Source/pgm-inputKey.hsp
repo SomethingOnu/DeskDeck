@@ -1,0 +1,92 @@
+; 初期変数
+radian = 0.00
+rotation_valueA = 0.00
+rotation_valueB = 0.00
+mouse_rotationA = 0.00
+mouse_rotationB = 0.00
+select        =  0
+select_margin =  0
+get_click     = -1
+click         = -1
+click_flag    = -1
+wheel         =  0
+get_wheel     =  0
+marginA       =  8
+marginB       = 16
+action        =  0
+hold          =  0
+hold_action   =  0
+hold_type     = -1
+hold_cnt      =  0
+
+goto *EoF_inputKey
+
+; クリック入力
+*commandClick
+	getkey get_click , 1
+	if get_click = 0 {
+		click = 0
+		click_flag = 0
+	}
+	switch click_flag
+		case 0
+			if get_click = 1 {
+				click = 1
+				click_flag = 1
+			}
+		swbreak
+		case 1
+			click = 0
+		swbreak
+	swend
+return
+; ホイール回転入力
+*commandWheelRotation
+	get_wheel = mousew
+	if get_wheel > 0 : wheel =  1
+	if get_wheel = 0 : wheel =  0
+	if get_wheel < 0 : wheel = -1
+return
+; マウス回転入力
+*commandMouseRotation
+	mouse_rotationA = 0.00
+	mouse_rotationB = 0.00
+	div4  = 1.00 /  4.00
+	div12 = 1.00 / 12.00
+	if select >= 1 & click = 1 : drag = 1
+	if click_flag = 0          : drag = 0
+	if drag = 1 {
+		mouse_rotationA = atan(mousex-(x+(xt/2)),mousey-(y+(yt/2)))
+		mouse_rotationB = mouse_rotationA/pi
+		if mouse_rotationB  >  -(div12) & mouse_rotationB <=  0.00 {
+			rotation_valueA  =   0.00
+		}
+		if mouse_rotationB  <= -(div12) & mouse_rotationB >  -1.00 {
+			rotation_valueA  = (mouse_rotationB+((1.00+mouse_rotationB)*div4))*(-50)
+		}
+		if mouse_rotationB   = -  1.00  | mouse_rotationB  =  1.00 {
+			rotation_valueA  =   50.00
+		}
+		if mouse_rotationB  >=   div12  & mouse_rotationB <   1.00 {
+			rotation_valueA  =  100.00-(mouse_rotationB-((1.00-mouse_rotationB)*div4))*50
+		}
+		if mouse_rotationB  <    div12  & mouse_rotationB >   0.00 {
+			rotation_valueA  =  100.00
+		}
+		if rotation_valueA  >=    0.00  & rotation_valueA <   2.50 {
+			rotation_valueB  =    0.00
+		}
+		n = 0
+		repeat 19
+			n = double(cnt)+1.00
+			if rotation_valueA >= n*5.00-2.50 & rotation_valueA < n*5.00+2.50 {
+				rotation_valueB = n*5.00
+			}
+		loop
+		if rotation_valueA >= 95.50 & rotation_valueA <= 100.00 {
+			rotation_valueB = 100.00
+		}
+	}
+return
+
+*EoF_inputKey

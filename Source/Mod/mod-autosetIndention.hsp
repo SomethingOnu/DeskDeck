@@ -1,0 +1,70 @@
+#module
+; 文字コード判定関数
+; Shift-JISの2バイト文字かどうかを判定
+; RV = IsByte (int p1)
+; p1 : 判定する文字コード
+; RV : 1=2byte文字の1文字目 (これ以外は0)
+#defcfunc IsByte int p1
+return ((p1>=129)&(p1<=159)) | ((p1>=224)&(p1<=252))
+#global
+
+#module
+#uselib "user32.dll"
+#func DrawText "DrawTextA" int,sptr,int,sptr,int
+#deffunc GetStrRect int p1 , str p2 , array p3
+	rc = 0,0,0,0
+	DrawText p1 , p2 , -1 , varptr(rc) , $00000400
+	p3.0 = rc.2
+	p3.1 = rc.3
+return
+#global
+
+; 初期変数
+textA = ""
+textB = ""
+
+goto *EoF_autosetIndention
+
+; 自動改行
+*autosetIndention
+	sdim buf , 256
+	nlpos = xt ; nlposドットで改行
+	i = 0 ; 各行頭からの位置
+	j = 0 ; 変数頭からの位置
+	fyen = 0 ; \フラグ
+	repeat strlen(textA)
+		byte1 = peek(textA,cnt) ; 1バイト取り出す
+		if byte1 = $5c & fyen = 0 : fyen = 1 : continue : else : fyen = 0 ; \フラグ(\の後は全て表示)
+		if IsByte(byte1) {
+			wpoke buf , j , wpeek(textA,cnt)
+			i += 2
+			GetStrRect hdc , buf , rc
+			if rc.0 > nlpos {
+				poke buf , j , 13 ; 改行
+				poke buf , j+1 , 10
+				i = 0 : j += 2
+				wpoke buf , j , wpeek(textA,cnt)
+				i += 2
+			}
+			j += 2
+			if byte1 = 13 | byte1 = 10 : i = 0 ; 改行時にiを行頭へ移動
+			continue cnt+2
+		} else {
+			poke buf , j , byte1
+			i++
+			GetStrRect hdc , buf , rc
+			if rc.0 > nlpos {
+				poke buf , j , 13 ; 改行
+				poke buf , j+1 , 10
+				i = 0 : j += 2
+				poke buf , j , byte1
+				i++
+			}
+			j++
+			if byte1 = 13 | byte1 = 10 : i = 0 ; 改行時にiを行頭へ移動
+		}
+	loop
+	textB = buf
+return
+
+*EoF_autosetIndention

@@ -1,0 +1,51 @@
+#ifndef waitFPS
+#module waitFPS
+
+#uselib "kernel32.dll"
+#func   func_sleep "Sleep" int
+
+#uselib "winmm.dll"
+#func   func_timeBeginPeriod "timeBeginPeriod" int
+#cfunc  cfunc_timeGetTime    "timeGetTime"
+
+#deffunc fps_config_ int p1 , local i
+	count_0t = cfunc_timeGetTime()
+	flame = p1
+	repeat flame
+		t = int(1000. * (cnt + 1) / flame)
+		timetable(cnt) = t
+		f(cnt) = t - i
+		i = t
+	loop
+	dim fps_count
+	t = count_0t
+return
+
+#deffunc fps_wait
+	await
+	gnt = cfunc_timeGetTime()
+	term = count_0t + timetable(fps_count) - gnt
+	if term > 0 : func_sleep term : gnt += term
+	f(fps_count) = gnt - t
+	t = gnt
+	fps_count++
+	fps_count \= flame
+	if fps_count : return term
+	count_0t = gnt
+return term
+
+#defcfunc fps_get_ int p1 , local i
+	repeat p1 , fps_count + flame - p1
+		i += f(cnt \ flame)
+	loop
+	if i : return 1000. * p1 / i
+return 0
+
+#global
+
+#define global fps_config(%1 = 60) fps_config_ %1
+#define global ctype fps_get(%1 = flame@waitFPS) fps_get_(%1)
+func_timeBeginPeriod@waitFPS 1
+fps_config
+
+#endif

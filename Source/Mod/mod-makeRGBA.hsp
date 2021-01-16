@@ -1,0 +1,32 @@
+; 初期変数
+bufferN = -1
+picV = ""
+
+goto *EoF_makeRGBA
+
+; 透過PNGを描画
+*makeRGBA
+	#include "a2d.hsp"
+	alCreateImageByFile 0 , picV
+	if stat = -1 : dialog "PNGを透過することができません！" , 1 : end
+	picX = alGetWidth()
+	picY = alGetHeight()
+	buffer bufferN , picX*2,picY
+		cmatrix(MAT_R) = 1.0 , 0.0 , 0.0 , 0.0 , 0.0
+		cmatrix(MAT_G) = 0.0 , 1.0 , 0.0 , 0.0 , 0.0
+		cmatrix(MAT_B) = 0.0 , 0.0 , 1.0 , 0.0 , 0.0
+		cmatrix(MAT_A) = 0.0 , 0.0 , 0.0 , 0.0 , 1.0
+		alCopyModeColorMatrix cmatrix ; アルファチャネルを無効にした画像を作成
+		alCopyImageToScreen 0 , bufferN , 0,0 , picX,picY
+		cmatrix(MAT_R) = 0.0 , 0.0 , 0.0 , 1.0 , 0.0
+		cmatrix(MAT_G) = 0.0 , 0.0 , 0.0 , 1.0 , 0.0
+		cmatrix(MAT_B) = 0.0 , 0.0 , 0.0 , 1.0 , 0.0
+		cmatrix(MAT_A) = 0.0 , 0.0 , 0.0 , 0.0 , 1.0
+		alCopyModeColorMatrix cmatrix ; アルファチャネルをグレースケール化した画像を作成
+		alCopyImageToScreen 0 , bufferN , picX,0 , picX,picY
+		alResetCopyMode
+	gsel 0
+	bufferN = -1
+return
+
+*EoF_makeRGBA

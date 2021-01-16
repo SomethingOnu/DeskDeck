@@ -1,0 +1,442 @@
+/*--------------------------------------
+; 作成者のURL ---> http://www.setsuki.com/
+;---------- ---------- ---------- ------
+; 最終更新日 2014/09/24
+
+参考サイト様
+
+; a2d.hsp
+http://sprocket.babyblue.jp/html/index.htm
+
+
+; HSP用 画像関連モジュール - 略して仮。
+http://www.tvg.ne.jp/menyukko/cauldron/hmimage.html
+
+-------------------------------------*/
+#module
+
+#uselib "kernel32.dll"
+	#cfunc GlobalAlloc "GlobalAlloc" int,int
+	#cfunc GlobalLock "GlobalLock" int
+	#func GlobalUnlock "GlobalUnlock" int
+	#func GlobalFree "GlobalFree" int
+
+	#func ipm_VirtualProtect "VirtualProtect" sptr,int,int,sptr
+	#define PAGE_EXECUTE_READWRITE 0x40
+
+#uselib "ole32.dll"
+	#func CreateStreamOnHGlobal "CreateStreamOnHGlobal" int,int,int
+	#func ReleaseStgMedium "ReleaseStgMedium" int
+	#define GMEM_MOVEABLE   2
+
+; GDI+ Token
+#uselib "gdiplus.dll"
+	#func GdipBitmapGetPixel "GdipBitmapGetPixel" int, int, int, int
+	#func GdipBitmapLockBits "GdipBitmapLockBits" int, int, int, int, int
+	#func GdipBitmapSetPixel "GdipBitmapSetPixel" int, int, int, int
+	#func GdipBitmapUnlockBits "GdipBitmapUnlockBits" int, int
+	#func GdipCreateBitmapFromGdiDib "GdipCreateBitmapFromGdiDib" int, int, int
+	#func GdipCreateBitmapFromScan0 "GdipCreateBitmapFromScan0" int, int, int, int, int, int
+	#func GdipCreateFontFromDC "GdipCreateFontFromDC" int, int
+	#func GdipCreateFromHDC "GdipCreateFromHDC" int, int
+	#func GdipCreateImageAttributes "GdipCreateImageAttributes" int
+	#func GdipCreateLineBrushI "GdipCreateLineBrushI" int, int, int, int, int, int
+	#func GdipCreatePen1 "GdipCreatePen1" int, float, int, int
+	#func GdipCreatePen2 "GdipCreatePen2" int, float, int, int
+	#func GdipCreateSolidFill "GdipCreateSolidFill" int, int
+	#func GdipCreateTexture "GdipCreateTexture" int, int, int
+	#func GdipDeleteBrush "GdipDeleteBrush" int
+	#func GdipDeleteFont "GdipDeleteFont" int
+	#func GdipDeleteGraphics "GdipDeleteGraphics" int
+	#func GdipDeletePen "GdipDeletePen" int
+	#func GdipDisposeImage "GdipDisposeImage" int
+	#func GdipDrawImageI "GdipDrawImageI" int, int, int, int
+	#func GdipDrawImagePointRectI "GdipDrawImagePointRectI" int, int, int, int, int, int, int, int, int
+	#func GdipDrawImagePointsI "GdipDrawImagePointsI" int, int, int, int
+	#func GdipDrawImageRectRectI "GdipDrawImageRectRectI" int, int, int, int, int, int, int, int, int, int, int, int, int, int
+	#func GdipGetImageEncoders "GdipGetImageEncoders" int, int, int
+	#func GdipGetImageEncodersSize "GdipGetImageEncodersSize" int, int
+	#func GdipGetImageGraphicsContext "GdipGetImageGraphicsContext" int, int
+	#func GdipGetImageHeight "GdipGetImageHeight" int, int
+	#func GdipGetImagePalette "GdipGetImagePalette" int, int, int
+	#func GdipGetImagePaletteSize "GdipGetImagePaletteSize" int, int
+	#func GdipGetImagePixelFormat "GdipGetImagePixelFormat" int, int
+	#func GdipGetImageWidth "GdipGetImageWidth" int, int
+	#func GdipGetPenDashStyle "GdipGetPenDashStyle" int, int
+	#func GdipGetPenWidth "GdipGetPenWidth" int, int
+	#func GdipLoadImageFromStream "GdipLoadImageFromStream" int, int
+	#func GdipResetClip "GdipResetClip" int
+	#func GdipResetWorldTransform "GdipResetWorldTransform" int
+	#func GdipSaveImageToFile "GdipSaveImageToFile" int, wstr, int, int
+	#func GdipSetClipRectI "GdipSetClipRectI" int, int, int, int, int, int
+	#func GdipSetCompositingMode "GdipSetCompositingMode" int, int
+	#func GdipSetCompositingQuality "GdipSetCompositingQuality" int, int
+	#func GdipSetImageAttributesColorMatrix "GdipSetImageAttributesColorMatrix" int, int, int, int, nullptr, nullptr
+	#func GdipSetImagePalette "GdipSetImagePalette" int, int
+	#func GdipSetPenDashStyle "GdipSetPenDashStyle" int, int
+	#func GdipSetPenMode "GdipSetPenMode" int, int
+	#func GdipSetPenWidth "GdipSetPenWidth" int, int
+	#func GdipSetPixelOffsetMode "GdipSetPixelOffsetMode" int, int
+	#func GdipSetSmoothingMode "GdipSetSmoothingMode" int, int
+	#func GdipSetTextRenderingHint "GdipSetTextRenderingHint" int, int
+	#func GdipSetWorldTransform "GdipSetWorldTransform" int, int
+	#func GdiplusShutdown "GdiplusShutdown" int
+	#func GdiplusStartup "GdiplusStartup" int, int, int
+
+; PixelFormat
+#define PixelFormatIndexed   0x00010000
+#define PixelFormatGDI       0x00020000 // Is a GDI-supported format
+#define PixelFormatAlpha     0x00040000 // Has an alpha component
+#define PixelFormatPAlpha    0x00080000
+#define PixelFormatExtended  0x00100000
+#define PixelFormatCanonical 0x00200000
+
+#const  PixelFormat1bppIndexed      (1 | ( 1 << 8) | PixelFormatIndexed | PixelFormatGDI)
+#const  PixelFormat4bppIndexed      (2 | ( 4 << 8) | PixelFormatIndexed | PixelFormatGDI)
+#const  PixelFormat8bppIndexed      (3 | ( 8 << 8) | PixelFormatIndexed | PixelFormatGDI)
+#const  PixelFormat16bppGrayScale   (4 | (16 << 8) | PixelFormatExtended)
+#const  PixelFormat16bppRGB555      (5 | (16 << 8) | PixelFormatGDI)
+#const  PixelFormat16bppRGB565      (6 | (16 << 8) | PixelFormatGDI)
+#const  PixelFormat16bppARGB1555    (7 | (16 << 8) | PixelFormatAlpha | PixelFormatGDI)
+#const  PixelFormat24bppRGB         (8 | (24 << 8) | PixelFormatGDI)
+#const  PixelFormat32bppRGB         (9 | (32 << 8) | PixelFormatGDI)
+#const  PixelFormat32bppARGB        (10 | (32 << 8) | PixelFormatAlpha | PixelFormatGDI | PixelFormatCanonical)
+#const  PixelFormat32bppPARGB       (11 | (32 << 8) | PixelFormatAlpha | PixelFormatPAlpha | PixelFormatGDI)
+#const  PixelFormat48bppRGB         (12 | (48 << 8) | PixelFormatExtended)
+#const  PixelFormat64bppARGB        (13 | (64 << 8) | PixelFormatAlpha  | PixelFormatCanonical | PixelFormatExtended)
+#const  PixelFormat64bppPARGB       (14 | (64 << 8) | PixelFormatAlpha  | PixelFormatPAlpha | PixelFormatExtended)
+
+;enum Unit
+#enum	UnitWorld = 0	// 0 -- World coordinate (non-physical unit)
+#enum	UnitDisplay	// 1 -- Variable -- for PageTransform only
+#enum	UnitPixel	// 2 -- Each unit is one device pixel.
+
+; パレット
+#define PaletteFlagsHasAlpha  0x001
+#define PaletteFlagsGrayScale 0x002
+#define PaletteFlagsHalftone  0x004
+
+/*typedef struct ColorPalette
+{
+    UINT Flags;
+    UINT Count;
+    ARGB Entries[1];
+}*/
+
+;----------- ----------- ------------ ----------- -----------
+#deffunc gdi_init
+	if varptr(GdiplusStartup) == 0 : return 0
+
+	gsi = 1, 0, 0, 0
+	GdiplusStartup varptr(gdiplusToken), varptr(gsi), 0	; GDI+ 開始
+	if( gdiplusToken == 0 ): return 0
+	return 1
+
+;----------- ----------- ------------ ----------- -----------
+#deffunc gdi_end
+	if( imgImage != 0 ){
+		GdipDisposeImage imgImage : imgImage = 0 ; Image を処分
+	}
+	if( hMemory != 0 ){
+		ReleaseStgMedium varptr(pIStream) ;delcom Istream
+		GlobalFree hMemory : hMemory = 0
+	}
+	if( gdiplusToken != 0 ){
+		GdiplusShutdown gdiplusToken : gdiplusToken = 0 ; GDI+ 終了
+	}
+	return
+
+;----------- ----------- ------------ ----------- -----------
+#deffunc gdi_save str filename, str format, int option
+	dim CLSID, 4
+	; GetEncoderClsid() HSP Version
+	GdipGetImageEncodersSize varptr(numEncoders), varptr(size)
+	if size {
+		dim ImageCodecInfo, size / 4 ; ImageCodecInfo 構造体の配列を取得する var
+		GdipGetImageEncoders numEncoders, size, varptr(ImageCodecInfo)
+		; sizeof(ImageCodecInfo)         == 19int
+		; ImageCodecInfo.CLSID offset    == 0int
+		; ImageCodecInfo.MimeType offset == 12int
+		repeat numEncoders ; 全エンコーダから目的のものを探す
+			dupptr v, ImageCodecInfo(cnt * 19 + 12), 128 ; MimeType 名が入った wchar[]
+			if( cnvwtos(v) == format ){ ; 目的の MimeType (p2) があったらば
+				memcpy CLSID, ImageCodecInfo(cnt * 19), 16 ; それをコピーして
+				break ; 探索終了
+			}
+		loop
+	}
+	if CLSID {
+		GdipSaveImageToFile imgImage, filename, varptr(CLSID), option	; Save tmpImage
+	}
+	result = stat
+
+	gdi_end
+	return result
+
+;---------- ---------- ---------- ---------- ----------
+; gifsave str filename, t_option, t_palnum ( 画像をGIF保存 )
+; filename  = ファイル名
+; t_option  = 透明色の指定 ( 1=color指定 / 2=パレット番号 )
+; t_palnum  = パレット番号 ( t_option が 2 の場合のみ使用 )
+;---------- ---------- ---------- ---------- ----------
+#deffunc gifsave str filename, int t_option, int t_palnum
+	gdi_init : if( stat == 0 ) : return -1
+
+	dim pal, 258
+	mref bm, 67
+	GdipCreateBitmapFromGdiDib bm.6, bm.5, varptr(imgImage)
+
+	; パレットの無いフルカラーの場合、パレット画像に変更
+	if( bm.3 != 1 ){
+		; 使用色数を取得
+		repeat ginfo_winy
+			alpha = cnt*bm.67 + bm.5
+			repeat ginfo_winx
+				dupptr image, alpha, 3 : alpha += 3 : palsize = -1
+				repeat 256
+					if( pal(cnt+2) == ( image & 0xFFFFFF ) ){
+						palsize = cnt : break
+					}
+				loop
+				if( palsize = -1 ){
+					if( pal(1) >= 256 ): pal(1)++ : break
+					pal( pal(1)+2 ) = image & 0xFFFFFF : pal(1)++
+				}
+			loop
+			if( pal(1) > 256 ): break
+		loop
+
+		tmpImage = imgImage
+		GdipCreateBitmapFromScan0 ginfo_winx, ginfo_winy, 0, PixelFormat8bppIndexed, 0, varptr(imgImage)
+		if( pal(1) <= 256 ){
+			GdipSetImagePalette imgImage, varptr(pal)
+		}
+		GdipCreateBitmapFromGdiDib bm.6, bm.5, varptr(tmpImage)
+		GdipGetImageGraphicsContext imgImage, varptr(tmpGraphics)
+		GdipDrawImageRectRectI tmpGraphics, tmpImage, 0,0,ginfo_winx,ginfo_winy,0,0,ginfo_winx,ginfo_winy,UnitPixel,0,0
+		GdipDeleteGraphics tmpGraphics : tmpGraphics = 0
+		GdipDisposeImage tmpImage : tmpImage = 0
+	}
+
+	; パレットを取得
+	GdipGetImagePaletteSize imgImage, varptr(palsize)
+	GdipGetImagePalette imgImage, varptr(pal), palsize
+
+	; 透明色の指定がある場合
+	if( pal(1) > 0 )&&(( t_option == 1 )||( t_option == 2 )){
+		rvar = ( ginfo_r << 16 )|( ginfo_g << 8 )|( ginfo_b )
+		repeat pal(1)
+			if( t_option == 1 )&&( rvar == ( pal(cnt+2)&0xFFFFFF ) ){
+				pal(cnt+2) = pal(cnt+2) & 0xFFFFFF : continue
+			}
+			if( t_option == 2 )&&( t_palnum == cnt ){
+				pal(cnt+2) = pal(cnt+2) & 0xFFFFFF : continue
+			}
+			pal(cnt+2) = pal(cnt+2) | 0xFF000000
+		loop
+		GdipSetImagePalette imgImage, varptr(pal)
+	}
+	gdi_save filename, "image/gif", 0
+	return
+
+;---------- ---------- ---------- ---------- ----------
+; jpgsave filename, quality ( 画像をJPEG保存 )
+; filename = ファイル名
+; quality  = 品質 ( 1～100 )
+;           1=低画質 [高圧縮] / 100=高画質 [低圧縮]
+;---------- ---------- ---------- ---------- ----------
+#deffunc jpgsave str filename, int quality
+	gdi_init : if( stat == 0 ) : return -1
+
+	rvar = quality : if( rvar < 1 ) : rvar = 80
+
+	mref bm, 67
+	GdipCreateBitmapFromGdiDib bm.6, bm.5, varptr(imgImage)
+
+;const CLSID_QUALITY = "{1D5BE4B5-FA4A-452D-9CDD-5DB35105E7EB}"
+
+/*Private Type EncoderParameter
+    Guid           As UUID
+    NumberOfValues As Long
+    Type           As Long
+    Value          As Long
+End Type
+
+Private Type EncoderParameters
+    Count         As Long
+    Parameter(15) As EncoderParameter
+End Type*/
+
+	dim EncoderParameter, 8
+	EncoderParameter(0) = 1 ; EncodParameters.Count
+	EncoderParameter(1) = $1D5BE4B5, $452DFA4A, $B35DDD9C, $EBE70551 ;EncoderParameter.Guid = ConvCLSID(CLSID_QUALITY)
+	EncoderParameter(5) = 1 ; EncoderParameter.NumberOfValues
+	EncoderParameter(6) = 4 ; EncoderParameter.Type = EncoderParameterValueTypeLong
+	EncoderParameter(7) = varptr(rvar) ;EncoderParameter.Value
+
+	gdi_save filename, "image/jpeg", varptr(EncoderParameter)
+	return
+
+;----------- ----------- ------------ ----------- -----------
+; pngsave filename, maskID ( 画像をPNG保存 )
+; filename = ファイル名
+; maskID   = マスクデータが入っているウィンドウID (パレットモードに限る)
+;----------- ----------- ------------ ----------- -----------
+#deffunc pngsave str filename, int maskID
+	gdi_init : if( stat == 0 ) : return -1
+
+	; マスク付き画面の読み込み
+	rvar = 0 : dim alpha, 1 : alpha = 0xff
+	if( maskID > 0 ){
+		mref bm, 96 + maskID : if( bm.3 ): rvar=1
+	}
+	if( rvar ){
+		; オフスクリーンバッファ Image 作成
+		GdipCreateBitmapFromScan0 ginfo_winx, ginfo_winy, 0, PixelFormat32bppARGB, 0, varptr(imgImage)
+		repeat ginfo_winy
+			y = cnt
+			repeat ginfo_winx
+				pget cnt, y
+				dupptr alpha, bm.5+(bm.2-1-limit(y,0,bm.2-1))*bm.67+limit(cnt,0,bm.1-1), 1
+				GdipBitmapSetPixel imgImage, cnt, y, (( alpha )<<24)|(( ginfo_r )<<16)|(( ginfo_g )<<8)|( ginfo_b )
+			loop
+		loop
+	} else {
+		mref bm, 67
+		GdipCreateBitmapFromGdiDib bm.6, bm.5, varptr(imgImage)
+	}
+	gdi_save filename, "image/png", 0
+	return
+
+;----------- ----------- ------------ ----------- -----------
+; imgload filename, maskID ( 画像を読み込み )
+; filename = ファイル名
+; maskID   = ウィンドウID
+;----------- ----------- ------------ ----------- -----------
+#deffunc imgload str filename, int maskID
+	gdi_init : if( stat == 0 ) {
+		picload filename : w = ginfo_winx : h = ginfo_winy : rvar = ginfo_sel
+		if( maskID > 0 ){
+			buffer maskID, w, h, 1
+			repeat 256 : palette cnt, cnt,cnt,cnt, cnt/255 : loop : palcolor 255 : boxf
+			gsel rvar
+		}
+		return 0
+	}
+
+	;----------- ----------- -----------
+	; メモリーストリームから読み込み
+	exist filename : if( strsize == -1 ): return 0
+	hMemory = GlobalAlloc(GMEM_MOVEABLE, strsize) : if( hMemory == 0 ): return 0
+	dupptr tmpmem, GlobalLock(hMemory), strsize, 2
+	bload filename, tmpmem, strsize
+	dim tmpmem, 1
+	GlobalUnlock hMemory
+	CreateStreamOnHGlobal hMemory, 1, varptr(pIStream)
+	if( stat ): gdi_end : return 0
+
+	;newcom Istream, , -1, pIStream
+	GdipLoadImageFromStream pIStream, varptr(imgImage) 
+	;----------- ----------- -----------
+	; ファイルから読み込み
+	;GdipLoadImageFromFile filename, varptr(imgImage) ; ファイルから Image をコンストラクト
+	;----------- ----------- -----------
+	if( imgImage == 0 ): gdi_end : return stat
+	result = stat
+
+	GdipGetImageWidth  imgImage, varptr(w)
+	GdipGetImageHeight imgImage, varptr(h)
+
+	if( maskID < 1 ){
+		buffer ginfo_sel, w, h, 0
+		; 分解せずに、アルファ付きで書き込みする
+		GdipCreateFromHDC hdc ,varptr(tmpGraphics)
+		GdipDrawImageRectRectI tmpGraphics, imgImage, 0,0,w,h,0,0,w,h,UnitPixel,0,0
+		GdipDeleteGraphics tmpGraphics
+		gdi_end
+		return result
+	}
+	GdipGetImagePixelFormat imgImage, varptr(flag)
+	rvar = ginfo_sel
+	;----- ----- -----
+	; マスクデータ作成
+	buffer maskID, w, h, 1
+	repeat 256 : palette cnt, cnt,cnt,cnt, cnt/255 : loop : palcolor 255 : boxf
+	if( flag == PixelFormat32bppARGB ){
+		GdipCreateFromHDC hdc ,varptr(tmpGraphics)
+		dim bm,24 : bm(15) = $3F800000, $3F800000, $3F800000, 0, 0, 0, 0, 0, $3F800000, $3F800000
+		GdipCreateImageAttributes varptr(attr)
+		GdipSetImageAttributesColorMatrix attr, 1,1, varptr(bm)
+		GdipDrawImageRectRectI tmpGraphics, imgImage, 0,0,w,h, 0,0,w,h, UnitPixel, attr, 0,0
+		GdipDeleteGraphics tmpGraphics : tmpGraphics = 0
+	}
+	;----- ----- -----
+	if(( flag & PixelFormatIndexed ) != 0 ){
+		; パレットデータがある場合
+		buffer rvar, w, h, 1 : mref vm, 66
+
+		GdipGetImagePaletteSize imgImage, varptr(palsize)
+		dim pal, 258
+		GdipGetImagePalette imgImage, varptr(pal), palsize
+		repeat 256 : palette cnt, pal(2+cnt)>>16&0xFF, pal(2+cnt)>>8&0xFF, pal(2+cnt)&0xFF, cnt/(pal(1)-1) : loop
+
+		dim BitmapData, 8
+		GdipBitmapLockBits imgImage, 0, 3, PixelFormat8bppIndexed, varptr(BitmapData)
+		repeat h
+			dupptr image, BitmapData(4) + ( h-1-cnt )*BitmapData(2), BitmapData(2)
+			memcpy vm, image, BitmapData(2), cnt*BitmapData(2), 0
+		loop
+		GdipBitmapUnlockBits imgImage, varptr(BitmapData)
+	;----- ----- -----
+	} else {
+		; パレットデータがない場合
+		buffer rvar, w, h, 0 : mref vm, 66
+		dim BitmapData, 8
+		GdipBitmapLockBits imgImage, 0, 3, PixelFormat24bppRGB, varptr(BitmapData)
+		repeat h
+			dupptr image, BitmapData(4) + ( h-1-cnt )*BitmapData(2), BitmapData(2)
+			memcpy vm, image, BitmapData(2), cnt*BitmapData(2), 0
+		loop
+		GdipBitmapUnlockBits imgImage, varptr(BitmapData)
+
+		;  アルファブレンドなしピクセル画像描画 (速度が遅い)
+		/*GdipCreateFromHDC hdc ,varptr(tmpGraphics)
+		dim bm, 24 : bm = $3F800000, 0, 0, 0, 0, 0, $3F800000, 0, 0, 0, 0, 0, $3F800000, 0, 0
+		bm(15) = 0, 0, 0, 0, 0, 0, 0, 0, $3F800000, $3F800000
+		GdipCreateImageAttributes varptr(attr)
+		GdipSetImageAttributesColorMatrix attr, 1,1, varptr(bm)
+		GdipDrawImageRectRectI tmpGraphics, imgImage, 0,0,w,h, 0,0,w,h, UnitPixel, attr, 0,0
+		GdipDeleteGraphics tmpGraphics : tmpGraphics = 0*/
+	}
+	;----- ----- -----
+	gdi_end
+	return result
+
+;----------- ----------- ------------ ----------- -----------
+; imgalpha maskID ( 透明色を取得 )
+; filename = ファイル名
+; maskID   = ウィンドウID
+;----------- ----------- ------------ ----------- -----------
+#deffunc imgalpha int maskID
+	rvar = ginfo_sel : w = 256 : h = 0 : dim alpha, 1 : dim image, 1
+	gsel maskID
+	mref bm, 67 : if( bm.3 != 1 ): gsel rvar : return
+	mref vm, 66
+	repeat ginfo_winy
+		alpha = cnt*bm.67
+		repeat ginfo_winx
+			if( peek(vm, alpha) < w ){
+				w = peek(vm, alpha)
+				h = alpha
+			}
+			alpha++
+		loop
+	loop
+	gsel rvar
+	if( w < 128 ){
+		pget h\bm.67, h/bm.67
+	}
+	return
+
+;----------- ----------- ------------ ----------- -----------
+#global

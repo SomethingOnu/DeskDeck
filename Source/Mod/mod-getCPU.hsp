@@ -1,0 +1,40 @@
+#uselib "Pdh.dll"
+#func global PdhOpenQuery                "PdhOpenQueryA"               sptr,sptr,sptr
+#func global PdhCloseQuery               "PdhCloseQuery"               sptr
+#func global PdhAddCounter               "PdhAddCounterA"              sptr,sptr,sptr,sptr
+#func global PdhCollectQueryData         "PdhCollectQueryData"         sptr
+#func global PdhGetFormattedCounterValue "PdhGetFormattedCounterValue" sptr,sptr,sptr,sptr
+#const global NULL           0
+#const global ERROR_SUCCESS  $00000000
+#const global PDH_FMT_LONG   $00000100
+#const global PDH_FMT_DOUBLE $00000200
+#define MSG_CPU  "\\Processor(_Total)\\%% Processor Time"
+#define MSG_CPU0 "\\Processor(0)\\%% Processor Time"
+#define MSG_CPU1 "\\Processor(1)\\%% Processor Time"
+#define MSG_CPU2 "\\Processor(2)\\%% Processor Time"
+#define MSG_CPU3 "\\Processor(3)\\%% Processor Time"
+
+dim posGraph : dim hQuery : dim hCounter
+dim fmtValue , 3
+dupptr fmtDouble , varptr(fmtValue(2)) , 8 , vartype("double")
+PdhOpenQuery NULL , 0 , varptr(hQuery)
+if (stat == ERROR_SUCCESS) {
+	PdhAddCounter hQuery , MSG_CPU , 0 , varptr(hCounter)
+	PdhCollectQueryData hQuery
+} else {
+	dialog "CPUégópó¶ÇéÊìæÇ∑ÇÈÇ±Ç∆Ç™Ç≈Ç´Ç‹ÇπÇÒÅI" , 1
+}
+
+goto *EoF_getCPU
+
+#defcfunc GetIntCPU
+	PdhCollectQueryData hQuery
+	PdhGetFormattedCounterValue hCounter , PDH_FMT_LONG , NULL , varptr(fmtValue)
+return fmtValue(2)
+
+#defcfunc GetDoubleCPU
+	PdhCollectQueryData hQuery
+	PdhGetFormattedCounterValue hCounter , PDH_FMT_DOUBLE , NULL , varptr(fmtValue)
+return fmtDouble
+
+*EoF_getCPU

@@ -1,0 +1,408 @@
+#include "shell32.as"
+
+#include "KexMP3.as"
+#include "mp3infp.as"
+
+#uselib "Wmvcore.dll"
+#func WMCreateEditor "WMCreateEditor" sptr
+#define IID_IWMMetadataEditor  "{96406bd9-2b2b-11d3-b36b-00c04f6108ff}"
+#define IID_IWMMetadataEditor2 "{203cffe3-2e18-4fdf-b59d-6e71530534cf}"
+#define IID_IWMHeaderInfo      "{96406bda-2b2b-11d3-b36b-00c04f6108ff}"
+#define IID_IWMHeaderInfo2     "{15cf9781-454e-482e-b393-85fae487a810}"
+#define IID_IWMHeaderInfo3     "{15CC68E3-27CC-4ecd-B222-3F5D02D80BD5}"
+#define IID_IWMImageInfo       "{9F0AA3B6-7267-4D89-88F2-BA915AA5C4C6}"
+
+#usecom IWMMetadataEditor IID_IWMMetadataEditor
+#comfunc IWMMetadataEditor_Open 3 wptr
+
+#usecom IWMHeaderInfo3 IID_IWMHeaderInfo3
+#comfunc IWMHeaderInfo3_GetAttributeByName     5 sptr,wstr,sptr,sptr,sptr
+#comfunc IWMHeaderInfo3_GetAttributeCountEx   17 sptr,sptr
+#comfunc IWMHeaderInfo3_GetAttributeByIndexEx 19 sptr,sptr,sptr,sptr,sptr,sptr,sptr,sptr
+
+; オプション
+leave_music_folder_history       =     1 ; 0:フォルダーの履歴を残さない / 1:フォルダーの履歴を残す
+leave_music_folder_histories     =    10 ; フォルダーの履歴の数
+music_album_art_size             =    48 ; [px] アルバムアートの解像度
+convert_black_color_of_album_art =     1 ; 0:変更なし / 1:黒色(0,0,0)を(1,1,1)に変換する(透過防止用)
+can_use_buffer                   =     6 ; nに元サイズ、n+1に指定した解像度のアルバムアートが描画される
+music_vol                        = 50.00 ; [%] 音量
+music_vol_balance                = 50.00 ; [%] 音量バランス
+music_mute                       =     0 ; 0:ミュートオフ / 1:ミュートオン
+playmode_shuffle                 =     0 ; 0:通常再生 / 1:音楽をシャッフル再生
+playmode_repeat                  =     0 ; 0:通常再生 / 1:同じ音楽をリピート再生
+seek_speed                       =     2 ; シークの速度
+; 初期変数
+sdim music_folderP     , 128
+sdim music_folderP_buf , 128
+sdim select_music_file , 128
+if leave_music_folder_history = 1 {
+	sdim folder_history     , 128 , leave_music_folder_histories
+	sdim folder_history_buf , 128
+}
+sdim dummy , 128
+sdim music_files , 128 , 1
+sdim music_file  , 128
+music_fileI = 0
+music_fileN = 0
+sdim open_music_folder , 128
+sdim open_music_file   , 128
+music_status = "" ; READY / PLAY / PAUSE / STOP / OOPS!
+music_play  = 0
+music_pause = 0
+if playmode_shuffle = 1 { playmode_normal = 0 } else { playmode_normal = 1 }
+music_prev      = 0
+music_rewind    = 0
+music_next      = 0
+music_f_forward = 0
+music_volL = 0
+music_volR = 0
+music_play_time_hour = 0
+music_play_time_min  = 0
+music_play_time_sec  = 0
+music_play_time_com  = 0
+music_play_time_str  = "**:**:**"
+music_length_time_hour = 0
+music_length_time_min  = 0
+music_length_time_sec  = 0
+music_length_time_com  = 0
+music_length_time_str  = "**:**:**"
+
+goto *EoF_playMP3
+
+; 音楽ファイルが含まれるフォルダーを選択
+*chooseMusicFolder
+	music_folderP_buf = music_folderP
+	dim bi , 8
+	sdim music_folderP , $206
+	menu_title = "音楽ファイルが含まれるフォルダーを選択"
+	bi = 0 , 0 , varptr(music_folderP) , varptr(menu_title) , 1,0,0,0
+	SHBrowseForFolder varptr(bi)
+	idl = stat
+	SHGetPathFromIDList idl , varptr(music_folderP)
+	if music_folderP = "" : music_folderP = music_folderP_buf
+	if stat = 1 : gosub *addMusicFile
+return
+; 音楽ファイルを追加
+*addMusicFile
+	if leave_music_folder_history = 1 {
+		if music_folderP = "" & folder_history(0) != "" {
+			music_folderP = folder_history(0)
+		}
+		if music_folderP != "" & folder_history(0) = "" {
+			folder_history(0) = music_folderP
+		}
+	}
+	dirlist dummy , music_folderP , 5
+	if stat = 0 : music_folderP = ""
+	music_play = 0 : music_pause = 0
+	MP3Stop : MP3Close : MP3Clean
+	open_music_folder = getpath(music_folderP,9)
+	if music_folderP != "" : chdir music_folderP ; カレントディレクトリを移動
+	dirlist music_file , "*.mp3" ; フォルダ内のMP3ファイル一覧を取得(\nで区切る)
+	split music_file , "\n" , music_files ; \nで連結したパスを区切る(配列変数をmusic_filesへ)
+	if setup = 0 {
+		music_fileN = 0
+		music_fileI = stat-2
+	} else {
+		if music_fileI != stat-2 {
+			music_fileI = stat-2
+			music_fileN = 0
+		}
+	}
+	if select_music_file != "" {
+		repeat music_fileI+1
+			if music_files(cnt) = select_music_file {
+				music_fileN = cnt
+				break
+			}
+		loop
+	}
+	music_status = "READY"
+	if leave_music_folder_history = 1 {
+		folder_history_buf = folder_history(leave_music_folder_histories-1)
+		n = leave_music_folder_histories-1
+		repeat leave_music_folder_histories-1
+			folder_history(n) = folder_history(n-1)
+			n -= 1
+		loop
+		folder_history(0) = music_folderP
+		n = 1
+		repeat leave_music_folder_histories-1
+			if folder_history(n) = folder_history(0) {
+				folder_history(n) = ""
+				k = n
+				repeat (leave_music_folder_histories-1)-k
+					folder_history(k) = folder_history(k+1)
+					k += 1
+				loop
+				folder_history(leave_music_folder_histories-1) = ""
+				if folder_history_buf != "" : folder_history(leave_music_folder_histories-1) = folder_history_buf
+			}
+			n += 1
+		loop
+	}
+	gosub *setMusic
+return
+; 音楽ファイルに含まれるアルバムアートを取得
+*getMusicAlbumArt
+	picX = 0 : picY = 0
+	size = 0
+	pEditor = 0
+	WMCreateEditor varptr(pEditor)
+	newcom pWMEdit , IID_IWMMetadataEditor , -1 , pEditor
+	IWMMetadataEditor_Open pWMEdit , music_files(music_fileN)
+	querycom pHeaderInfo , pWMEdit , IID_IWMHeaderInfo
+	cAttributes = 0
+	IWMHeaderInfo3_GetAttributeCountEx pHeaderInfo , 0xFFFF , varptr(cAttributes)
+	repeat cAttributes
+		sdim szName , 1024+2
+		NameLen = 1024
+		Type = 0
+		LangIndex = 0
+		DataLength = 0
+		IWMHeaderInfo3_GetAttributeByIndexEx pHeaderInfo , 0 , cnt , varptr(szName) , varptr(NameLen) , varptr(Type) , varptr(LangIndex) , 0 , varptr(DataLength)
+		if cnvwtos(szName) == "WM/Picture"{
+			sdim buf , DataLength
+			IWMHeaderInfo3_GetAttributeByIndexEx pHeaderInfo , 0 , cnt , varptr(szName) , varptr(NameLen) , varptr(Type) , varptr(LangIndex) , varptr(buf) , varptr(DataLength)
+			size = lpeek(buf,9)
+			ptr  = lpeek(buf,13)
+			dupptr img , ptr , size , 2
+			memfile img , 0 , size
+		}
+	loop
+	if size != 0 { exist_album_art = 1 } else { exist_album_art = 0 }
+	if exist_album_art = 1 {
+		buffer can_use_buffer
+			pos 0,0 : picload "MEM:Album_Art.jpg"
+			picX = ginfo_winx
+			picY = ginfo_winy
+		gsel 0
+		buffer can_use_buffer+1 , music_album_art_size,music_album_art_size
+			pos 0,0
+			if picX > picY : gzoom music_album_art_size,music_album_art_size , can_use_buffer , (picX-picY)/2,0 , picY,picY , 1
+			if picX = picY : gzoom music_album_art_size,music_album_art_size , can_use_buffer ,             0,0 , picX,picY , 1
+			if picX < picY : gzoom music_album_art_size,music_album_art_size , can_use_buffer , 0,(picY-picX)/2 , picX,picX , 1
+			if convert_black_color_of_album_art = 1 {
+				y = 0
+				repeat music_album_art_size
+				x = 0
+				repeat music_album_art_size
+					pget x,y ; 色を取得
+					r = ginfo_r : g = ginfo_g : b = ginfo_b
+					if r = 0 & g = 0 & b = 0 { color r+1,g+1,b+1 } else { color r,g,b }
+					pset x,y ; 描画
+				x += 1
+				loop
+				y += 1
+				loop
+			}
+		gsel 0
+	}
+return
+; 音楽ファイルを設置
+*setMusic
+	if music_fileI != -1 {
+		bufA = "" : bufB = "" : bufC = "" : bufD = ""
+		gosub *setMusicVol
+		if music_mute = 0 {
+			MP3Ready int(music_volL),int(music_volR) , 0
+		} else {
+			MP3Ready 0,0 , 0
+		}
+		MP3Open music_files(music_fileN) , 0
+		open_music_file = getpath(music_files(music_fileN),9)
+		mp3infp_Load 1 , music_files(music_fileN)
+		mp3infp_GetValue "TIME" , varptr(p)
+		dupptr bufA , p , 128 , 2
+		getstr bufB , bufA , 0 , 'sec)'
+		split bufB , "(" , bufC , bufD
+		music_length_time_buf = int(bufD)
+		music_prev = 0 : music_rewind    = 0
+		music_next = 0 : music_f_forward = 0
+		gosub *getMusicLengthTime
+		gosub *getMusicAlbumArt
+		if select_music_file != "" {
+			gosub *playMusic
+			select_music_file = ""
+		}
+	}
+return
+; 音楽ファイルを設置(次へ)
+*setNextMusic
+	MP3Stop : MP3Close : MP3Clean
+	if playmode_shuffle = 1 & playmode_repeat = 0 & music_fileI != 0 {
+		repeat
+			buf = rnd(music_fileI)
+			if buf != music_fileN-1 {
+				music_fileN = buf
+				break
+			}
+		loop
+	}
+	gosub *setMusic
+	if music_play = 1 & music_pause = 0 : MP3Play
+	if music_play = 0 & music_pause = 0 : MP3Stop
+return
+; 音楽を再生
+*playMusic
+	if music_play = 0 & music_fileI != -1 {
+		if music_mute = 0 {
+			MP3SetVol int(music_volL),int(music_volR)
+		} else {
+			MP3SetVol 0,0
+		}
+		MP3Start
+		music_status = "PLAY"
+	}
+	music_play  = 1
+	music_pause = 0
+	if music_fileI = -1 : music_status = "OOPS!"
+return
+; 音楽を一時停止
+*pauseMusic
+	if music_pause = 0 & music_play = 1 & music_fileI != -1 {
+		MP3Start
+		music_status = "PAUSE"
+	}
+	music_play  = 0
+	music_pause = 1
+	if music_fileI = -1 : music_status = "OOPS!"
+return
+; 音楽を停止
+*stopMusic
+	MP3Stop
+	music_play  = 0
+	music_pause = 0
+	music_status = "STOP"
+	if music_fileI = -1 : music_status = "OOPS!"
+return
+; 音楽を巻き戻す
+*runMusicRewind
+	if music_fileI != -1 {
+		if music_rewind = 0 {
+			if music_play = 1 : MP3Start
+			MP3Pos : seek = stat
+		}
+		music_rewind = 1
+		if seek >= seek_speed : seek -= seek_speed
+	} else {
+		music_rewind = 0
+	}
+return
+*setMusicRewind
+	if music_fileI != -1 {
+		if music_play = 1 : MP3Start
+		music_rewind = 0
+		MP3Seek seek
+	} else {
+		music_rewind = 0
+	}
+return
+; 音楽を早送りする
+*runMusicFForward
+	if music_fileI != -1 {
+		if music_f_forward = 0 {
+			if music_play = 1 : MP3Start
+			MP3Pos : seek = stat
+		}
+		music_f_forward = 1
+		if seek + seek_speed <= music_length_time_com : seek += seek_speed
+	} else {
+		music_f_forward = 0
+	}
+return
+*setMusicFForward
+	if music_fileI != -1 {
+		if music_play = 1 : MP3Start
+		music_f_forward = 0
+		MP3Seek seek
+	} else {
+		music_f_forward = 0
+	}
+return
+; 音量を変更
+*setMusicVol
+	if music_vol > 100.00 : music_vol = 100.00
+	if music_vol <   0.00 : music_vol =   0.00
+	music_volL = music_vol*((100.00-music_vol_balance)/100.00)*655.35
+	music_volR = music_vol*((       music_vol_balance)/100.00)*655.35
+return
+; 音量バランスを変更
+*setMusicVolBalance
+	if music_vol_balance > 100.00 : music_vol_balance = 100.00
+	if music_vol_balance <   0.00 : music_vol_balance =   0.00
+	music_volL = music_vol*((100.00-music_vol_balance)/100.00)*655.35
+	music_volR = music_vol*((       music_vol_balance)/100.00)*655.35
+return
+; 前の音楽へ
+*runPrevMusic
+	if music_fileI != -1 & music_fileN != 0 | playmode_shuffle = 1 {
+		music_prev = 1
+		if music_fileN != 0 : music_fileN -= 1
+		MP3Stop : MP3Close : MP3Clean
+		if playmode_shuffle = 1 & music_fileI != 0 {
+			repeat
+				buf = rnd(music_fileI)
+				if buf != music_fileN+1 {
+					music_fileN = buf
+					break
+				}
+			loop
+		}
+		gosub *setMusic
+		if music_play = 1 & music_pause = 0 : MP3Play
+		if music_play = 0 & music_pause = 0 : MP3Stop
+	} else {
+		music_prev = 0
+	}
+return
+; 次の音楽へ
+*runNextMusic
+	if music_fileI != -1 & music_fileN != music_fileI | playmode_shuffle = 1 {
+		music_next = 1
+		if music_fileN != music_fileI : music_fileN += 1
+		gosub *setNextMusic
+	} else {
+		music_next = 0
+	}
+return
+; 次の音楽へ(自動)
+*autorunNextMusic
+	if music_fileN = music_fileI {
+		music_play  = 0
+		music_pause = 0
+	}
+	if music_fileN != music_fileI | playmode_shuffle = 1 | playmode_repeat = 1 {
+		if playmode_repeat = 0 & music_fileI != 0 : music_fileN += 1
+		gosub *setNextMusic
+	}
+return
+; 音楽の再生時間を取得
+*getMusicPlayTime
+	if music_rewind = 0 & music_f_forward = 0 {
+		MP3Pos
+		music_play_time_com = stat
+	} else {
+		music_play_time_com = seek
+	}
+	music_play_time_hour = music_play_time_com/3600
+	music_play_time_min  = music_play_time_com/60 - music_play_time_hour*60
+	music_play_time_sec  = music_play_time_com - music_play_time_hour*3600 - music_play_time_min*60
+	music_play_time_str  = ""+strf("%02d",music_play_time_hour)+":"+strf("%02d",music_play_time_min)+":"+strf("%02d",music_play_time_sec)
+return
+; 音楽の終了時間を取得
+*getMusicLengthTime
+	music_length_time_com  = music_length_time_buf
+	music_length_time_hour = music_length_time_com/3600
+	music_length_time_min  = music_length_time_com/60 - music_length_time_hour*60
+	music_length_time_sec  = music_length_time_com - music_length_time_hour*3600 - music_length_time_min*60
+	music_length_time_str  = ""+strf("%02d",music_length_time_hour)+":"+strf("%02d",music_length_time_min)+":"+strf("%02d",music_length_time_sec)
+return
+; 履歴を削除
+*deleteFolderHistory
+	music_folderP = ""
+	sdim folder_history , 128 , leave_music_folder_histories
+return
+
+*EoF_playMP3

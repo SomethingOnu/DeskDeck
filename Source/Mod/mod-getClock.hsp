@@ -1,0 +1,129 @@
+#include "Mod/mod-ClipboardController.hsp"
+
+; オプション
+time_epoc = 719163 ; エポック時間(1970/01/01 00:00:00)
+utc = "+09:00"     ; 協定世界時
+; 初期変数
+tick_update     = -1
+tick_update_buf = -1
+frame_count     = -1
+time_year  = -1 : time_str_year  = ""
+time_mon   = -1 : time_str_mon   = ""
+time_week  = -1 : time_str_week  = ""
+time_day   = -1 : time_str_day   = ""
+time_hour  = -1 : time_str_hour  = ""
+time_min   = -1 : time_str_min   = ""
+time_sec   = -1 : time_str_sec   = ""
+time_m_sec = -1 : time_str_m_sec = ""
+time_grego = -1
+time_unix  = -1
+timer_status = 0
+set_timer_hour = 0 : run_timer_hour = 0
+set_timer_min  = 0 : run_timer_min  = 0
+set_timer_sec  = 0 : run_timer_sec  = 0
+set_timer_com  = 0 : run_timer_com  = 0
+
+goto *EoF_getClock
+
+; 時間を計算
+*calcTime
+	tick_update = 0
+	if tick_update_buf != gettime(6) : tick_update = 1
+	tick_update_buf = gettime(6)
+	time_year  = gettime(0) : time_str_year  = strf("%04d",time_year)
+	time_mon   = gettime(1) : time_str_mon   = strf("%02d",time_mon)
+	time_day   = gettime(3) : time_str_day   = strf("%02d",time_day)
+	time_hour  = gettime(4) : time_str_hour  = strf("%02d",time_hour)
+	time_min   = gettime(5) : time_str_min   = strf("%02d",time_min)
+	time_sec   = gettime(6) : time_str_sec   = strf("%02d",time_sec)
+	time_m_sec = gettime(7) : time_str_m_sec = strf("%04d",time_m_sec)
+	time_week  = gettime(2)
+	switch time_week
+		case 0 : time_str_week = "日" : swbreak
+		case 1 : time_str_week = "月" : swbreak
+		case 2 : time_str_week = "火" : swbreak
+		case 3 : time_str_week = "水" : swbreak
+		case 4 : time_str_week = "木" : swbreak
+		case 5 : time_str_week = "金" : swbreak
+		case 6 : time_str_week = "土" : swbreak
+	swend
+	if tick_update = 1 {
+		; gettime(0)\4 = 0 & gettime(0)\100 != 0 | gettime(0)\400 = 0
+		time_grego = 365*(time_year-1)+int(time_year/4)-int(time_year/100)+int(time_year/400)+31+28+1+int(306*(time_mon+1)/10)-122+(time_day-1)
+		time_unix = (time_grego-time_epoc)*86400+(time_hour*3600)+(time_min*60)+time_sec
+	}
+	if timer_status = 2 & run_timer_com = 0 {
+		timer_status = 4
+	}
+	if timer_status = 1 {
+		frame_count = 0
+		timer_status = 2
+	}
+	if timer_status = 2 {
+		frame_count += 1
+		if frame_count = fps {
+			frame_count = 0
+			run_timer_com -= 1
+			run_timer_hour = run_timer_com/3600
+			run_timer_min  = run_timer_com/60 - run_timer_hour*60
+			run_timer_sec  = run_timer_com - run_timer_hour*3600 - run_timer_min*60
+		}
+	}
+	if timer_status = 4 {
+		dialog "ジリリリリリン！" , 0 , "タイマー"
+		gosub *resetTimer
+	}
+return
+; 日付・時刻・UNIX時間をクリップボードにコピー
+*copyTimeDateJA
+	ClipB_SetText "" + time_str_year + "年" + time_str_mon + "月" + time_str_day + "日(" + time_str_week + "曜日)"
+return
+*copyTimeDateISO
+	ClipB_SetText "" + time_str_year + "-" + time_str_mon + "-" + time_str_day
+return
+*copyTimeMomentJA
+	ClipB_SetText "" + time_str_hour + "時" + time_str_min + "分" + time_str_sec + "秒"
+return
+*copyTimeMomentISO
+	ClipB_SetText "" + time_str_hour + ":" + time_str_min + ":" + time_str_sec + utc
+return
+*copyTimeUnix
+	ClipB_SetText str(time_unix)
+return
+; タイマーを起動する
+*runTimer
+	run_timer_hour = int(set_timer_hour)
+	run_timer_min  = int(set_timer_min)
+	run_timer_sec  = int(set_timer_sec)
+	run_timer_com  = int(set_timer_hour)*3600+int(set_timer_min)*60+int(set_timer_sec)
+	if run_timer_hour >= 0 & run_timer_min >= 0 & run_timer_sec >= 0 & run_timer_hour <= 23 & run_timer_min <= 59 & run_timer_sec <= 59 {
+		timer_status = 1
+		reload = 1
+	} else {
+		run_timer_hour = 0
+		run_timer_min  = 0
+		run_timer_sec  = 0
+		run_timer_com  = 0
+	}
+return
+; タイマーを一時停止する
+*pauseTimer
+	timer_status = 3
+	reload = 1
+return
+; タイマーを再開する
+*playTimer
+	timer_status = 2
+	reload = 1
+return
+; タイマーを初期化する
+*resetTimer
+	run_timer_hour = 0
+	run_timer_min  = 0
+	run_timer_sec  = 0
+	run_timer_com  = 0
+	timer_status = 0
+	reload = 1
+return
+
+*EoF_getClock

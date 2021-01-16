@@ -1,0 +1,87 @@
+; パスモード
+path_mode = 0
+if path_mode = 1 {
+	dirP = "A:/Work/Software/Utility - Desk Deck/Source"
+	delete "hsptmp"
+	delete "obj"
+} else {
+	dirP = dir_exe
+}
+chdir dirP
+; データ
+*Reset
+title_name = "Desk Deck"
+version = "1.0.0"
+#packopt name "Desk Deck"
+#packopt icon "bin-IconDD.ico"
+#pack "pgm-Main.hsp"
+font_main = "ＭＳ ゴシック"
+font_sub = "ＭＳ 明朝"
+randomize
+#include "Mod/mod-getTaskBarHeight.hsp"
+winX = 952
+winY = 320
+posX = (ginfo_dispx-winX)-8
+posY = (ginfo_dispy-winY)-taskbarH
+bgscr 0 , winX,winY , 8 , posX,posY
+title "" + title_name + " " + version
+font font_main , 16
+setup = 1
+#include "shell32.as"
+#include "Mod/mod-waitFPS.hsp"
+#include "Mod/mod-getActiveWindow.hsp"
+#include "Mod/mod-getCPU.hsp"
+#include "Mod/mod-getClock.hsp"
+#include "Mod/mod-transparentBackground.hsp"
+#include "Mod/mod-makeRGBA.hsp"
+#include "Mod/mod-dropFile.hsp"
+#include "Mod/mod-playMP3.hsp"
+#include "Mod/mod-generateRandomString.hsp"
+#include "Mod/mod-autosetIndention.hsp"
+#include "Mod/mod-testGDI+.hsp"
+; 初期変数
+break_mode = 0
+; コンフィグ
+#include "pgm-Config.hsp"
+gosub *checkConfig
+gosub *loadConfigA
+; 設定
+#include "pgm-Graphic.hsp"
+#include "pgm-System.hsp"
+#include "pgm-inputKey.hsp"
+#include "pgm-Test.hsp"
+gosub *addMusicFile
+; ルート
+setup = 0
+*Main
+	redraw 0
+	ThreadId = GetWindowThreadProcessId(WindowFromPoint(ginfo_mx,ginfo_my),ProcessId)
+	if (ProcessId == OwnProcessId) {
+		gosub *commandClick
+		gosub *commandWheelRotation
+		low_fps = 0
+	} else {
+		if smartmode = 1 { low_fps = 1 } else { low_fps = 0 }
+	}
+	if memory_run_app   = 1 : gosub *runApplication
+	if memory_run_q_app = 1 : gosub *runQuickApplication
+	color 0,0,0 : boxf
+	gosub *drawMain
+	gosub *transparentBackground
+	gosub *drawButton
+	gosub *drawClock
+	gosub *drawDisplayA
+	gosub *drawDisplayB
+	if menu_switch = 1 : gosub *drawMenu
+	if test_key = 1 : gosub *checkTestKey
+	gosub *moveWindow
+	gosub *getFileStatus
+
+	setButtonA 8,8 , 40,40 ; 電源
+	if action = 1 : goto *offPowerA
+
+	if low_fps = 0 { fps_config fps } else { fps_config fps/4 } : fps_wait
+	onexit  *offPowerA
+	onerror *offPowerB
+	redraw 1
+goto *Main

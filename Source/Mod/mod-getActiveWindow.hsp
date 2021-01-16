@@ -1,0 +1,14 @@
+#uselib "user32.dll"
+
+#func  global GetClassName             "GetClassNameA"            int,var,int
+#cfunc global GetWindowThreadProcessId "GetWindowThreadProcessId" int,var
+#cfunc WindowFromPoint                 "WindowFromPoint"          int,int
+
+#uselib "kernel32.dll"
+
+#func GetModuleFileName          "GetModuleFileNameA"  int,var,int
+#func global GetCurrentProcessId "GetCurrentProcessId"
+#func global GetCurrentThreadId  "GetCurrentThreadId"
+
+OwnProcessId = GetCurrentProcessId()
+OwnThreadId = GetCurrentThreadId()
