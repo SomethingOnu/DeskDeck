@@ -13,10 +13,14 @@ music_vol_balance = 50
 music_bass        = 50
 music_treble      = 50
 fps = 30
-sdim application                 , 128 , 3,10
-sdim quick_application           , 128 , 4
-sdim applicant_application       , 128 , 3,10
-sdim applicant_quick_application , 128 , 4
+sdim applicationA                 , 128 , 3,10
+sdim applicationB                 , 128 , 3,10
+sdim quick_applicationA           , 128 , 4
+sdim quick_applicationB           , 128 , 4
+sdim applicant_applicationA       , 128 , 3,10
+sdim applicant_applicationB       , 128 , 3,10
+sdim applicant_quick_applicationA , 128 , 4
+sdim applicant_quick_applicationB , 128 , 4
 memory_run_app   = 0
 memory_run_q_app = 0
 dim app_page , 3
@@ -41,10 +45,10 @@ goto *EoF_Config
 		noteadd ""
 		noteadd "Smart Mode = 1"
 		noteadd ""
-		noteadd "Play Mode : Normal  = 1"
-		noteadd "Play Mode : Shuffle = 0"
-		noteadd "Play Mode : Repeat  = 0"
-		noteadd "Play Mode : Fade    = 0"
+		noteadd "Play Mode : Normal   = 1"
+		noteadd "Play Mode : Shuffle  = 0"
+		noteadd "Play Mode : Repeat   = 0"
+		noteadd "Play Mode : Continue = 1"
 		noteadd ""
 		noteadd "Sound Volume         = 50"
 		noteadd "Sound Volume Balance = 50"
@@ -53,43 +57,77 @@ goto *EoF_Config
 		noteadd ""
 		noteadd "FPS = 30"
 		noteadd ""
-		noteadd "Application (00) = "
-		noteadd "Application (01) = "
-		noteadd "Application (02) = "
-		noteadd "Application (03) = "
-		noteadd "Application (04) = "
-		noteadd "Application (05) = "
-		noteadd "Application (06) = "
-		noteadd "Application (07) = "
-		noteadd "Application (08) = "
-		noteadd "Application (09) = "
+		noteadd "Application A (00) = "
+		noteadd "            B (00) = "
+		noteadd "Application A (01) = "
+		noteadd "            B (01) = "
+		noteadd "Application A (02) = "
+		noteadd "            B (02) = "
+		noteadd "Application A (03) = "
+		noteadd "            B (03) = "
+		noteadd "Application A (04) = "
+		noteadd "            B (04) = "
+		noteadd "Application A (05) = "
+		noteadd "            B (05) = "
+		noteadd "Application A (06) = "
+		noteadd "            B (06) = "
+		noteadd "Application A (07) = "
+		noteadd "            B (07) = "
+		noteadd "Application A (08) = "
+		noteadd "            B (08) = "
+		noteadd "Application A (09) = "
+		noteadd "            B (09) = "
 		noteadd "
-		noteadd "Application (10) = "
-		noteadd "Application (11) = "
-		noteadd "Application (12) = "
-		noteadd "Application (13) = "
-		noteadd "Application (14) = "
-		noteadd "Application (15) = "
-		noteadd "Application (16) = "
-		noteadd "Application (17) = "
-		noteadd "Application (18) = "
-		noteadd "Application (19) = "
+		noteadd "Application A (10) = "
+		noteadd "            B (10) = "
+		noteadd "Application A (11) = "
+		noteadd "            B (11) = "
+		noteadd "Application A (12) = "
+		noteadd "            B (12) = "
+		noteadd "Application A (13) = "
+		noteadd "            B (13) = "
+		noteadd "Application A (14) = "
+		noteadd "            B (14) = "
+		noteadd "Application A (15) = "
+		noteadd "            B (15) = "
+		noteadd "Application A (16) = "
+		noteadd "            B (16) = "
+		noteadd "Application A (17) = "
+		noteadd "            B (17) = "
+		noteadd "Application A (18) = "
+		noteadd "            B (18) = "
+		noteadd "Application A (19) = "
+		noteadd "            B (19) = "
 		noteadd "
-		noteadd "Application (20) = "
-		noteadd "Application (21) = "
-		noteadd "Application (22) = "
-		noteadd "Application (23) = "
-		noteadd "Application (24) = "
-		noteadd "Application (25) = "
-		noteadd "Application (26) = "
-		noteadd "Application (27) = "
-		noteadd "Application (28) = "
-		noteadd "Application (29) = "
+		noteadd "Application A (20) = "
+		noteadd "            B (20) = "
+		noteadd "Application A (21) = "
+		noteadd "            B (21) = "
+		noteadd "Application A (22) = "
+		noteadd "            B (22) = "
+		noteadd "Application A (23) = "
+		noteadd "            B (23) = "
+		noteadd "Application A (24) = "
+		noteadd "            B (24) = "
+		noteadd "Application A (25) = "
+		noteadd "            B (25) = "
+		noteadd "Application A (26) = "
+		noteadd "            B (26) = "
+		noteadd "Application A (27) = "
+		noteadd "            B (27) = "
+		noteadd "Application A (28) = "
+		noteadd "            B (28) = "
+		noteadd "Application A (29) = "
+		noteadd "            B (29) = "
 		noteadd "
-		noteadd "Quick Application (0) = "
-		noteadd "Quick Application (1) = "
-		noteadd "Quick Application (2) = "
-		noteadd "Quick Application (3) = "
+		noteadd "Quick Application A (0) = "
+		noteadd "                  B (0) = "
+		noteadd "Quick Application A (1) = "
+		noteadd "                  B (1) = "
+		noteadd "Quick Application A (2) = "
+		noteadd "                  B (2) = "
+		noteadd "Quick Application A (3) = "
+		noteadd "                  B (3) = "
 		noteadd "
 		noteadd "Music Folder History (0) = "
 		noteadd "Music Folder History (1) = "
@@ -112,149 +150,217 @@ return
 *loadConfigA
 	noteload configP
 	nl  = 0
-	noteget get_data , nl : getstr music_folderP        , get_data , 17+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr music_folderP         , get_data , 17+3 , '\n' : nl += 1
 	nl += 1
-	noteget get_data , nl : getstr music_fileI          , get_data , 22+3 , '\n' : nl += 1 : music_fileI       = int(music_fileI)
-	noteget get_data , nl : getstr music_fileN          , get_data , 22+3 , '\n' : nl += 1 : music_fileN       = int(music_fileN)
+	noteget get_data , nl : getstr music_fileI           , get_data , 22+3 , '\n' : nl += 1 : music_fileI       = int(music_fileI)
+	noteget get_data , nl : getstr music_fileN           , get_data , 22+3 , '\n' : nl += 1 : music_fileN       = int(music_fileN)
 	nl += 1
-	noteget get_data , nl : getstr smartmode            , get_data , 10+3 , '\n' : nl += 1 : smartmode         = int(smartmode)
+	noteget get_data , nl : getstr smartmode             , get_data , 10+3 , '\n' : nl += 1 : smartmode         = int(smartmode)
 	nl += 1
-	noteget get_data , nl : getstr playmode_normal      , get_data , 19+3 , '\n' : nl += 1 : playmode_normal   = int(playmode_normal)
-	noteget get_data , nl : getstr playmode_shuffle     , get_data , 19+3 , '\n' : nl += 1 : playmode_shuffle  = int(playmode_shuffle)
-	noteget get_data , nl : getstr playmode_repeat      , get_data , 19+3 , '\n' : nl += 1 : playmode_repeat   = int(playmode_repeat)
-	noteget get_data , nl : getstr playmode_fade        , get_data , 19+3 , '\n' : nl += 1 : playmode_fade     = int(playmode_fade)
+	noteget get_data , nl : getstr playmode_normal       , get_data , 20+3 , '\n' : nl += 1 : playmode_normal   = int(playmode_normal)
+	noteget get_data , nl : getstr playmode_shuffle      , get_data , 20+3 , '\n' : nl += 1 : playmode_shuffle  = int(playmode_shuffle)
+	noteget get_data , nl : getstr playmode_repeat       , get_data , 20+3 , '\n' : nl += 1 : playmode_repeat   = int(playmode_repeat)
+	noteget get_data , nl : getstr playmode_continue     , get_data , 20+3 , '\n' : nl += 1 : playmode_continue = int(playmode_continue)
 	nl += 1
-	noteget get_data , nl : getstr music_vol            , get_data , 20+3 , '\n' : nl += 1 : music_vol         = double(music_vol)
-	noteget get_data , nl : getstr music_vol_balance    , get_data , 20+3 , '\n' : nl += 1 : music_vol_balance = double(music_vol_balance)
-	noteget get_data , nl : getstr music_bass           , get_data , 20+3 , '\n' : nl += 1 : music_bass        = double(music_bass)
-	noteget get_data , nl : getstr music_treble         , get_data , 20+3 , '\n' : nl += 1 : music_treble      = double(music_treble)
+	noteget get_data , nl : getstr music_vol             , get_data , 20+3 , '\n' : nl += 1 : music_vol         = double(music_vol)
+	noteget get_data , nl : getstr music_vol_balance     , get_data , 20+3 , '\n' : nl += 1 : music_vol_balance = double(music_vol_balance)
+	noteget get_data , nl : getstr music_bass            , get_data , 20+3 , '\n' : nl += 1 : music_bass        = double(music_bass)
+	noteget get_data , nl : getstr music_treble          , get_data , 20+3 , '\n' : nl += 1 : music_treble      = double(music_treble)
 	nl += 1
-	noteget get_data , nl : getstr fps                  , get_data ,  3+3 , '\n' : nl += 1 : fps               = int(fps)
+	noteget get_data , nl : getstr fps                   , get_data ,  3+3 , '\n' : nl += 1 : fps               = int(fps)
 	nl += 1
-	noteget get_data , nl : getstr application(0,0)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(0,1)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(0,2)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(0,3)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(0,4)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(0,5)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(0,6)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(0,7)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(0,8)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(0,9)     , get_data , 16+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,0)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,0)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,1)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,1)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,2)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,2)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,3)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,3)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,4)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,4)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,5)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,5)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,6)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,6)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,7)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,7)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,8)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,8)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,9)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,9)     , get_data , 18+3 , '\n' : nl += 1
 	nl += 1
-	noteget get_data , nl : getstr application(1,0)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(1,1)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(1,2)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(1,3)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(1,4)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(1,5)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(1,6)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(1,7)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(1,8)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(1,9)     , get_data , 16+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,0)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,0)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,1)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,1)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,2)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,2)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,3)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,3)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,4)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,4)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,5)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,5)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,6)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,6)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,7)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,7)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,8)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,8)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,9)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,9)     , get_data , 18+3 , '\n' : nl += 1
 	nl += 1
-	noteget get_data , nl : getstr application(2,0)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(2,1)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(2,2)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(2,3)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(2,4)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(2,5)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(2,6)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(2,7)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(2,8)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(2,9)     , get_data , 16+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,0)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,0)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,1)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,1)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,2)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,2)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,3)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,3)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,4)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,4)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,5)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,5)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,6)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,6)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,7)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,7)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,8)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,8)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,9)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,9)     , get_data , 18+3 , '\n' : nl += 1
 	nl += 1
-	noteget get_data , nl : getstr quick_application(0) , get_data , 21+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr quick_application(1) , get_data , 21+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr quick_application(2) , get_data , 21+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr quick_application(3) , get_data , 21+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr quick_applicationA(0) , get_data , 23+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr quick_applicationB(0) , get_data , 23+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr quick_applicationA(1) , get_data , 23+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr quick_applicationB(1) , get_data , 23+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr quick_applicationA(2) , get_data , 23+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr quick_applicationB(2) , get_data , 23+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr quick_applicationA(3) , get_data , 23+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr quick_applicationB(3) , get_data , 23+3 , '\n' : nl += 1
 	nl += 1
-	noteget get_data , nl : getstr folder_history(0)    , get_data , 24+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr folder_history(1)    , get_data , 24+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr folder_history(2)    , get_data , 24+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr folder_history(3)    , get_data , 24+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr folder_history(4)    , get_data , 24+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr folder_history(5)    , get_data , 24+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr folder_history(6)    , get_data , 24+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr folder_history(7)    , get_data , 24+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr folder_history(8)    , get_data , 24+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr folder_history(9)    , get_data , 24+3 , '\n'
+	noteget get_data , nl : getstr folder_history(0)     , get_data , 24+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr folder_history(1)     , get_data , 24+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr folder_history(2)     , get_data , 24+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr folder_history(3)     , get_data , 24+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr folder_history(4)     , get_data , 24+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr folder_history(5)     , get_data , 24+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr folder_history(6)     , get_data , 24+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr folder_history(7)     , get_data , 24+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr folder_history(8)     , get_data , 24+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr folder_history(9)     , get_data , 24+3 , '\n'
 return
 ; コンフィグファイルを読み込む(エディター用)
 *loadConfigB
 	noteload configP
 	nl = 19
-	noteget get_data , nl : getstr application(0,0)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(0,1)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(0,2)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(0,3)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(0,4)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(0,5)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(0,6)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(0,7)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(0,8)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(0,9)     , get_data , 16+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,0)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,0)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,1)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,1)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,2)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,2)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,3)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,3)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,4)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,4)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,5)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,5)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,6)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,6)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,7)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,7)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,8)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,8)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(0,9)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(0,9)     , get_data , 18+3 , '\n' : nl += 1
 	nl += 1
-	noteget get_data , nl : getstr application(1,0)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(1,1)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(1,2)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(1,3)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(1,4)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(1,5)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(1,6)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(1,7)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(1,8)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(1,9)     , get_data , 16+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,0)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,0)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,1)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,1)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,2)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,2)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,3)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,3)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,4)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,4)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,5)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,5)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,6)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,6)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,7)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,7)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,8)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,8)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(1,9)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(1,9)     , get_data , 18+3 , '\n' : nl += 1
 	nl += 1
-	noteget get_data , nl : getstr application(2,0)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(2,1)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(2,2)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(2,3)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(2,4)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(2,5)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(2,6)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(2,7)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(2,8)     , get_data , 16+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr application(2,9)     , get_data , 16+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,0)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,0)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,1)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,1)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,2)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,2)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,3)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,3)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,4)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,4)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,5)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,5)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,6)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,6)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,7)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,7)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,8)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,8)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationA(2,9)     , get_data , 18+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr applicationB(2,9)     , get_data , 18+3 , '\n' : nl += 1
 	nl += 1
-	noteget get_data , nl : getstr quick_application(0) , get_data , 21+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr quick_application(1) , get_data , 21+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr quick_application(2) , get_data , 21+3 , '\n' : nl += 1
-	noteget get_data , nl : getstr quick_application(3) , get_data , 21+3 , '\n'
+	noteget get_data , nl : getstr quick_applicationA(0) , get_data , 23+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr quick_applicationB(0) , get_data , 23+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr quick_applicationA(1) , get_data , 23+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr quick_applicationB(1) , get_data , 23+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr quick_applicationA(2) , get_data , 23+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr quick_applicationB(2) , get_data , 23+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr quick_applicationA(3) , get_data , 23+3 , '\n' : nl += 1
+	noteget get_data , nl : getstr quick_applicationB(3) , get_data , 23+3 , '\n'
 return
 ; コンフィグファイルを保存(通常)
 *saveConfigA
 	notesel cache
 	nl  = 0
-	noteadd "Music Folder Path = " + music_folderP               , nl , 1 : nl += 1
-	noteadd ""                                                   , nl , 1 : nl += 1
-	noteadd "Number of Music        = " + music_fileI            , nl , 1 : nl += 1
-	noteadd "Index of Playing Music = " + music_fileN            , nl , 1 : nl += 1
-	noteadd ""                                                   , nl , 1 : nl += 1
-	noteadd "Smart Mode = " + smartmode                          , nl , 1 : nl += 1
-	noteadd ""                                                   , nl , 1 : nl += 1
-	noteadd "Play Mode : Normal  = " + playmode_normal           , nl , 1 : nl += 1
-	noteadd "Play Mode : Shuffle = " + playmode_shuffle          , nl , 1 : nl += 1
-	noteadd "Play Mode : Repeat  = " + playmode_repeat           , nl , 1 : nl += 1
-	noteadd "Play Mode : Fade    = " + playmode_fade             , nl , 1 : nl += 1
-	noteadd ""                                                   , nl , 1 : nl += 1
-	noteadd "Sound Volume         = " + int(music_vol)           , nl , 1 : nl += 1
-	noteadd "Sound Volume Balance = " + int(music_vol_balance)   , nl , 1 : nl += 1
-	noteadd "Sound Bass           = " + int(music_bass)          , nl , 1 : nl += 1
-	noteadd "Sound Treble         = " + int(music_treble)        , nl , 1 : nl += 1
-	noteadd ""                                                   , nl , 1 : nl += 1
-	noteadd "FPS = " + fps                                       , nl , 1
-	nl  = 57
-	noteadd "Music Folder History (0) = " + folder_history(0)    , nl , 1 : nl += 1
-	noteadd "Music Folder History (1) = " + folder_history(1)    , nl , 1 : nl += 1
-	noteadd "Music Folder History (2) = " + folder_history(2)    , nl , 1 : nl += 1
-	noteadd "Music Folder History (3) = " + folder_history(3)    , nl , 1 : nl += 1
-	noteadd "Music Folder History (4) = " + folder_history(4)    , nl , 1 : nl += 1
-	noteadd "Music Folder History (5) = " + folder_history(5)    , nl , 1 : nl += 1
-	noteadd "Music Folder History (6) = " + folder_history(6)    , nl , 1 : nl += 1
-	noteadd "Music Folder History (7) = " + folder_history(7)    , nl , 1 : nl += 1
-	noteadd "Music Folder History (8) = " + folder_history(8)    , nl , 1 : nl += 1
-	noteadd "Music Folder History (9) = " + folder_history(9)    , nl , 1
+	noteadd "Music Folder Path = " + music_folderP                   , nl , 1 : nl += 1
+	noteadd ""                                                       , nl , 1 : nl += 1
+	noteadd "Number of Music        = " + music_fileI                , nl , 1 : nl += 1
+	noteadd "Index of Playing Music = " + music_fileN                , nl , 1 : nl += 1
+	noteadd ""                                                       , nl , 1 : nl += 1
+	noteadd "Smart Mode = " + smartmode                              , nl , 1 : nl += 1
+	noteadd ""                                                       , nl , 1 : nl += 1
+	noteadd "Play Mode : Normal   = " + playmode_normal              , nl , 1 : nl += 1
+	noteadd "Play Mode : Shuffle  = " + playmode_shuffle             , nl , 1 : nl += 1
+	noteadd "Play Mode : Repeat   = " + playmode_repeat              , nl , 1 : nl += 1
+	noteadd "Play Mode : Continue = " + playmode_continue            , nl , 1 : nl += 1
+	noteadd ""                                                       , nl , 1 : nl += 1
+	noteadd "Sound Volume         = " + int(music_vol)               , nl , 1 : nl += 1
+	noteadd "Sound Volume Balance = " + int(music_vol_balance)       , nl , 1 : nl += 1
+	noteadd "Sound Bass           = " + int(music_bass)              , nl , 1 : nl += 1
+	noteadd "Sound Treble         = " + int(music_treble)            , nl , 1 : nl += 1
+	noteadd ""                                                       , nl , 1 : nl += 1
+	noteadd "FPS = " + fps                                           , nl , 1
+	nl  = 57+34
+	noteadd "Music Folder History (0) = " + folder_history(0)        , nl , 1 : nl += 1
+	noteadd "Music Folder History (1) = " + folder_history(1)        , nl , 1 : nl += 1
+	noteadd "Music Folder History (2) = " + folder_history(2)        , nl , 1 : nl += 1
+	noteadd "Music Folder History (3) = " + folder_history(3)        , nl , 1 : nl += 1
+	noteadd "Music Folder History (4) = " + folder_history(4)        , nl , 1 : nl += 1
+	noteadd "Music Folder History (5) = " + folder_history(5)        , nl , 1 : nl += 1
+	noteadd "Music Folder History (6) = " + folder_history(6)        , nl , 1 : nl += 1
+	noteadd "Music Folder History (7) = " + folder_history(7)        , nl , 1 : nl += 1
+	noteadd "Music Folder History (8) = " + folder_history(8)        , nl , 1 : nl += 1
+	noteadd "Music Folder History (9) = " + folder_history(9)        , nl , 1
 	notesave configP
 return
 ; コンフィグファイルを保存(エディター用)
@@ -263,43 +369,77 @@ return
 	if stat = 6 {
 		notesel cache
 		nl = 19
-		noteadd "Application (00) = " + application(0,0)          , nl , 1 : nl += 1
-		noteadd "Application (01) = " + application(0,1)          , nl , 1 : nl += 1
-		noteadd "Application (02) = " + application(0,2)          , nl , 1 : nl += 1
-		noteadd "Application (03) = " + application(0,3)          , nl , 1 : nl += 1
-		noteadd "Application (04) = " + application(0,4)          , nl , 1 : nl += 1
-		noteadd "Application (05) = " + application(0,5)          , nl , 1 : nl += 1
-		noteadd "Application (06) = " + application(0,6)          , nl , 1 : nl += 1
-		noteadd "Application (07) = " + application(0,7)          , nl , 1 : nl += 1
-		noteadd "Application (08) = " + application(0,8)          , nl , 1 : nl += 1
-		noteadd "Application (09) = " + application(0,9)          , nl , 1 : nl += 1
+		noteadd "Application A (00) = " + applicationA(0,0)          , nl , 1 : nl += 1
+		noteadd "            B (00) = " + applicationB(0,0)          , nl , 1 : nl += 1
+		noteadd "Application A (01) = " + applicationA(0,1)          , nl , 1 : nl += 1
+		noteadd "            B (01) = " + applicationB(0,1)          , nl , 1 : nl += 1
+		noteadd "Application A (02) = " + applicationA(0,2)          , nl , 1 : nl += 1
+		noteadd "            B (02) = " + applicationB(0,2)          , nl , 1 : nl += 1
+		noteadd "Application A (03) = " + applicationA(0,3)          , nl , 1 : nl += 1
+		noteadd "            B (03) = " + applicationB(0,3)          , nl , 1 : nl += 1
+		noteadd "Application A (04) = " + applicationA(0,4)          , nl , 1 : nl += 1
+		noteadd "            B (04) = " + applicationB(0,4)          , nl , 1 : nl += 1
+		noteadd "Application A (05) = " + applicationA(0,5)          , nl , 1 : nl += 1
+		noteadd "            B (05) = " + applicationB(0,5)          , nl , 1 : nl += 1
+		noteadd "Application A (06) = " + applicationA(0,6)          , nl , 1 : nl += 1
+		noteadd "            B (06) = " + applicationB(0,6)          , nl , 1 : nl += 1
+		noteadd "Application A (07) = " + applicationA(0,7)          , nl , 1 : nl += 1
+		noteadd "            B (07) = " + applicationB(0,7)          , nl , 1 : nl += 1
+		noteadd "Application A (08) = " + applicationA(0,8)          , nl , 1 : nl += 1
+		noteadd "            B (08) = " + applicationB(0,8)          , nl , 1 : nl += 1
+		noteadd "Application A (09) = " + applicationA(0,9)          , nl , 1 : nl += 1
+		noteadd "            B (09) = " + applicationB(0,9)          , nl , 1 : nl += 1
 		nl += 1
-		noteadd "Application (10) = " + application(1,0)          , nl , 1 : nl += 1
-		noteadd "Application (11) = " + application(1,1)          , nl , 1 : nl += 1
-		noteadd "Application (12) = " + application(1,2)          , nl , 1 : nl += 1
-		noteadd "Application (13) = " + application(1,3)          , nl , 1 : nl += 1
-		noteadd "Application (14) = " + application(1,4)          , nl , 1 : nl += 1
-		noteadd "Application (15) = " + application(1,5)          , nl , 1 : nl += 1
-		noteadd "Application (16) = " + application(1,6)          , nl , 1 : nl += 1
-		noteadd "Application (17) = " + application(1,7)          , nl , 1 : nl += 1
-		noteadd "Application (18) = " + application(1,8)          , nl , 1 : nl += 1
-		noteadd "Application (19) = " + application(1,9)          , nl , 1 : nl += 1
+		noteadd "Application A (10) = " + applicationA(1,0)          , nl , 1 : nl += 1
+		noteadd "            B (10) = " + applicationB(1,0)          , nl , 1 : nl += 1
+		noteadd "Application A (11) = " + applicationA(1,1)          , nl , 1 : nl += 1
+		noteadd "            B (11) = " + applicationB(1,1)          , nl , 1 : nl += 1
+		noteadd "Application A (12) = " + applicationA(1,2)          , nl , 1 : nl += 1
+		noteadd "            B (12) = " + applicationB(1,2)          , nl , 1 : nl += 1
+		noteadd "Application A (13) = " + applicationA(1,3)          , nl , 1 : nl += 1
+		noteadd "            B (13) = " + applicationB(1,3)          , nl , 1 : nl += 1
+		noteadd "Application A (14) = " + applicationA(1,4)          , nl , 1 : nl += 1
+		noteadd "            B (14) = " + applicationB(1,4)          , nl , 1 : nl += 1
+		noteadd "Application A (15) = " + applicationA(1,5)          , nl , 1 : nl += 1
+		noteadd "            B (15) = " + applicationB(1,5)          , nl , 1 : nl += 1
+		noteadd "Application A (16) = " + applicationA(1,6)          , nl , 1 : nl += 1
+		noteadd "            B (16) = " + applicationB(1,6)          , nl , 1 : nl += 1
+		noteadd "Application A (17) = " + applicationA(1,7)          , nl , 1 : nl += 1
+		noteadd "            B (17) = " + applicationB(1,7)          , nl , 1 : nl += 1
+		noteadd "Application A (18) = " + applicationA(1,8)          , nl , 1 : nl += 1
+		noteadd "            B (18) = " + applicationB(1,8)          , nl , 1 : nl += 1
+		noteadd "Application A (19) = " + applicationA(1,9)          , nl , 1 : nl += 1
+		noteadd "            B (19) = " + applicationB(1,9)          , nl , 1 : nl += 1
 		nl += 1
-		noteadd "Application (20) = " + application(2,0)          , nl , 1 : nl += 1
-		noteadd "Application (21) = " + application(2,1)          , nl , 1 : nl += 1
-		noteadd "Application (22) = " + application(2,2)          , nl , 1 : nl += 1
-		noteadd "Application (23) = " + application(2,3)          , nl , 1 : nl += 1
-		noteadd "Application (24) = " + application(2,4)          , nl , 1 : nl += 1
-		noteadd "Application (25) = " + application(2,5)          , nl , 1 : nl += 1
-		noteadd "Application (26) = " + application(2,6)          , nl , 1 : nl += 1
-		noteadd "Application (27) = " + application(2,7)          , nl , 1 : nl += 1
-		noteadd "Application (28) = " + application(2,8)          , nl , 1 : nl += 1
-		noteadd "Application (29) = " + application(2,9)          , nl , 1 : nl += 1
+		noteadd "Application A (20) = " + applicationA(2,0)          , nl , 1 : nl += 1
+		noteadd "            B (20) = " + applicationB(2,0)          , nl , 1 : nl += 1
+		noteadd "Application A (21) = " + applicationA(2,1)          , nl , 1 : nl += 1
+		noteadd "            B (21) = " + applicationB(2,1)          , nl , 1 : nl += 1
+		noteadd "Application A (22) = " + applicationA(2,2)          , nl , 1 : nl += 1
+		noteadd "            B (22) = " + applicationB(2,2)          , nl , 1 : nl += 1
+		noteadd "Application A (23) = " + applicationA(2,3)          , nl , 1 : nl += 1
+		noteadd "            B (23) = " + applicationB(2,3)          , nl , 1 : nl += 1
+		noteadd "Application A (24) = " + applicationA(2,4)          , nl , 1 : nl += 1
+		noteadd "            B (24) = " + applicationB(2,4)          , nl , 1 : nl += 1
+		noteadd "Application A (25) = " + applicationA(2,5)          , nl , 1 : nl += 1
+		noteadd "            B (25) = " + applicationB(2,5)          , nl , 1 : nl += 1
+		noteadd "Application A (26) = " + applicationA(2,6)          , nl , 1 : nl += 1
+		noteadd "            B (26) = " + applicationB(2,6)          , nl , 1 : nl += 1
+		noteadd "Application A (27) = " + applicationA(2,7)          , nl , 1 : nl += 1
+		noteadd "            B (27) = " + applicationB(2,7)          , nl , 1 : nl += 1
+		noteadd "Application A (28) = " + applicationA(2,8)          , nl , 1 : nl += 1
+		noteadd "            B (28) = " + applicationB(2,8)          , nl , 1 : nl += 1
+		noteadd "Application A (29) = " + applicationA(2,9)          , nl , 1 : nl += 1
+		noteadd "            B (29) = " + applicationB(2,9)          , nl , 1 : nl += 1
 		nl += 1
-		noteadd "Quick Application (0) = " + quick_application(0) , nl , 1 : nl += 1
-		noteadd "Quick Application (1) = " + quick_application(1) , nl , 1 : nl += 1
-		noteadd "Quick Application (2) = " + quick_application(2) , nl , 1 : nl += 1
-		noteadd "Quick Application (3) = " + quick_application(3) , nl , 1
+		noteadd "Quick Application A (0) = " + quick_applicationA(0) , nl , 1 : nl += 1
+		noteadd "                  B (0) = " + quick_applicationB(0) , nl , 1 : nl += 1
+		noteadd "Quick Application A (1) = " + quick_applicationA(1) , nl , 1 : nl += 1
+		noteadd "                  B (1) = " + quick_applicationB(1) , nl , 1 : nl += 1
+		noteadd "Quick Application A (2) = " + quick_applicationA(2) , nl , 1 : nl += 1
+		noteadd "                  B (2) = " + quick_applicationB(2) , nl , 1 : nl += 1
+		noteadd "Quick Application A (3) = " + quick_applicationA(3) , nl , 1 : nl += 1
+		noteadd "                  B (3) = " + quick_applicationB(3) , nl , 1
 		notesave configP
 		bgscr 10 , winX,winY-128 , 0 , posX,posY
 		title "" + title_name + " (Saving)"

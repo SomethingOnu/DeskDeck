@@ -3,24 +3,24 @@ goto *EoF_System
 ; アプリケーションを開く
 *runApplication
 	memory_run_app = 0
-	if application(memory_appY,memory_appX) != "" {
-		ex = getpath(application(memory_appY,memory_appX),2) : ex = strmid(ex,0,4)
+	if applicationA(memory_appY,memory_appX) != "" {
+		ex = getpath(applicationA(memory_appY,memory_appX),2) : ex = strmid(ex,0,4)
 		if ex = ".exe" { app_type = 0 } else { app_type = 1 }
 		if app_type =  0 {
-			exist getpath(application(memory_appY,memory_appX),1)+".exe"
+			exist getpath(applicationA(memory_appY,memory_appX),1)+".exe"
 			if strsize != -1 {
-				exec application(memory_appY,memory_appX) , 0
+				exec applicationA(memory_appY,memory_appX) , 0
 			} else {
-				exist dirP+getpath(application(memory_appY,memory_appX),1)+".exe"
+				exist getpath(applicationB(memory_appY,memory_appX),1)+".exe"
 				if strsize != -1 {
-					exec dirP+application(memory_appY,memory_appX) , 0
+					exec applicationB(memory_appY,memory_appX) , 0
 				} else {
 					dialog "["+memory_appX+","+memory_appY+"]\nファイルが存在しません！" , 1 , "起動エラー"
 				}
 			}
 		}
 		if app_type = 1 {
-			exec application(memory_appY,memory_appX) , 16
+			exec applicationA(memory_appY,memory_appX) , 16
 		}
 	} else {
 		dialog "["+memory_appX+","+memory_appY+"]\nパスが空白です！" , 1 , "起動エラー"
@@ -30,24 +30,34 @@ return
 ; クイック・アプリケーションを開く
 *runQuickApplication
 	memory_run_q_app = 0
-	if quick_application(memory_q_appX) != "" {
-		ex = getpath(quick_application(memory_q_appX),2) : ex = strmid(ex,0,4)
+	if quick_applicationA(memory_q_appX) != "" {
+		ex = getpath(quick_applicationA(memory_q_appX),2) : ex = strmid(ex,0,4)
 		if ex = ".exe" { app_type = 0 } else { app_type = 1 }
 		if app_type =  0 {
-			exist getpath(quick_application(memory_q_appX),1)+".exe"
+			exist getpath(quick_applicationA(memory_q_appX),1)+".exe"
 			if strsize != -1 {
-				exec quick_application(memory_q_appX) , 0
+				exec quick_applicationA(memory_q_appX) , 0
 			} else {
-				exist dirP+getpath(quick_application(memory_q_appX),1)+".exe"
+				exist getpath(quick_applicationB(memory_q_appX),1)+".exe"
 				if strsize != -1 {
-					exec dirP+quick_application(memory_q_appX) , 0
+					exec quick_applicationB(memory_q_appX) , 0
 				} else {
 					dialog "["+memory_q_appX+"]\nファイルが存在しません！" , 1 , "起動エラー"
 				}
 			}
 		}
 		if app_type = 1 {
-			exec quick_application(memory_q_appX) , 16
+			exist quick_applicationA(memory_q_appX)
+			if strsize != -1 {
+				exec quick_applicationA(memory_q_appX) , 16
+			} else {
+				exist quick_applicationB(memory_q_appX)
+				if strsize != -1 {
+					exec quick_applicationB(memory_q_appX) , 16
+				} else {
+					dialog "["+memory_q_appX+"]\nファイルが存在しません！" , 1 , "起動エラー"
+				}
+			}
 		}
 	} else {
 		dialog "["+memory_q_appX+"]\nパスが空白です！" , 1 , "起動エラー"

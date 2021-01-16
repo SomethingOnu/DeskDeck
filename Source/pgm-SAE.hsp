@@ -11,14 +11,14 @@ chdir dirP
 ; データ
 *Reset
 title_name = "Desk Deck (Set Application Editor)"
-version = "1.0.0"
+version = "1.1.0"
 #packopt name "Desk Deck (Set Application Editor)"
 #packopt icon "bin-IconSAE.ico"
 #pack "pgm-SAE.hsp"
 font_name = "ＭＳ ゴシック"
 randomize
 winX = 624
-winY = 248+128
+winY = 248+152
 posX = (ginfo_dispx-winX)/2
 posY = (ginfo_dispy-winY)/2
 screen 0 , winX,winY , 0 , posX,posY
@@ -50,19 +50,20 @@ select_image        = 0
 select_app_type     = 0
 image_zoom          = 0
 image_zoom_mes      = "24x24"
-image_zoom_type     = 0
-image_zoom_type_mes = "標準"
+image_zoom_type     = 1
+image_zoom_type_mes = "綺麗"
 ; コンフィグ
 #include "pgm-Config.hsp"
 gosub *checkConfig
 gosub *loadConfigB
 ; 設定
 buffer 1 , 784,312
+	chdir dirP
 	picload "Application.png" ; ボタンのアイコン
 gsel 0
 ; ルート
-gosub *drawObject
 status = "準備ができた！"
+gosub *drawObject
 *Main
 	redraw 0
 	color 0,0,0 : boxf
@@ -70,7 +71,7 @@ status = "準備ができた！"
 	gosub *commandClick
 	gosub *selectIndex
 	gosub *pickIndex
-	color 127,127,127 : pos 16,347 : mes status
+	color 127,127,127 : pos 16,371 : mes status
 	fps_wait
 	redraw 1
 goto *Main
@@ -82,18 +83,24 @@ goto *Main
 		input dummy , 224-1,18 , 1024
 		pos 128,310+1
 		input dummy , 352-1,18 , 1024
+		pos 128,334+1
+		input dummy , 352-1,18 , 1024
 	}
 	if select_app_type = 1 {
 		pos 128,286+1
 		input imageP , 224-1,18 , 1024
 		pos 128,310+1
-		input applicant_application(select_appY,select_appX) , 352-1,18 , 1024
+		input applicant_applicationA(select_appY,select_appX) , 352-1,18 , 1024
+		pos 128,334+1
+		input applicant_applicationB(select_appY,select_appX) , 352-1,18 , 1024
 	}
 	if select_app_type = 2 {
 		pos 128,286+1
 		input imageP , 224-1,18 , 1024
 		pos 128,310+1
-		input applicant_quick_application(select_q_appX) , 352-1,18 , 1024
+		input applicant_quick_applicationA(select_q_appX) , 352-1,18 , 1024
+		pos 128,334+1
+		input applicant_quick_applicationB(select_q_appX) , 352-1,18 , 1024
 	}
 	pos 352,286
 	objsize 64,20
@@ -113,10 +120,16 @@ goto *Main
 	pos 544,310
 	objsize 64,20
 	button "確定" , *confirmFileP
-	pos 544,342
+	pos 480,334
+	objsize 64,20
+	button "参照" , *selectFileP
+	pos 544,334
+	objsize 64,20
+	button "確定" , *confirmFileP
+	pos 544,366
 	objsize 64,20
 	button "保存" , *saveConfigB
-	pos 480,342
+	pos 480,366
 	objsize 64,20
 	button "破棄" , *discardConfig
 return
@@ -142,7 +155,8 @@ return
 			if action = 1 {
 				select_appY = appY
 				select_appX = appX
-				applicant_application(select_appY,select_appX) = application(select_appY,select_appX)
+				applicant_applicationA(select_appY,select_appX) = applicationA(select_appY,select_appX)
+				applicant_applicationB(select_appY,select_appX) = applicationB(select_appY,select_appX)
 				select_app_type = 1
 				imageP = ""
 				select_image = 0
@@ -165,7 +179,8 @@ return
 		gosub *drawSelect
 		if action = 1 {
 			select_q_appX = q_appX
-			applicant_quick_application(select_q_appX) = quick_application(select_q_appX)
+			applicant_quick_applicationA(select_q_appX) = quick_applicationA(select_q_appX)
+			applicant_quick_applicationB(select_q_appX) = quick_applicationB(select_q_appX)
 			select_app_type = 2
 			imageP = ""
 			select_image = 0
@@ -186,14 +201,14 @@ return
 return
 *pickIndex
 	color 239,239,239
-	boxf  0,248 , 624,248+128
+	boxf  0,248 , 624,248+152
 	color 223,223,223
-	boxf  93,285 , 610,330
+	boxf  93,285 , 610,354
 	color 0,0,0
-	boxf  14-1,262-1 , 14+68,262+68
+	boxf  14-1,286-1 , 14+68,286+68
 	color 255,255,255
-	boxf  15-1,263-1 , 15+66,263+66
-	pos   16,264
+	boxf  15-1,287-1 , 15+66,287+66
+	pos   16,286
 	if select_app_type = 1 {
 		if select_appX >= 0 & select_appX <= 4 : gzoom 64,64 , 1 , 56+(32+24)*select_appX,24+(32+16)*select_appY , 32,32
 		if select_appX >= 5 & select_appX <= 9 : gzoom 64,64 , 1 , 344+(32+24)*(select_appX-5),24+(32+16)*select_appY , 32,32
@@ -214,7 +229,9 @@ return
 	pos   96,288+2
 	mes   "画像"
 	pos   96,312+2
-	mes   "パス"
+	mes   "パスA"
+	pos   96,336+2
+	mes   "パスB"
 return
 ; 選択を描画
 *drawSelect
@@ -240,12 +257,20 @@ return
 ; ファイルパスを取得
 *selectFileP
 	if select_app_type != 0 {
+	buttonN = stat
 		dialog "exe" , 16
 		if refstr != "" {
-			if select_app_type = 1 : applicant_application(select_appY,select_appX) = refstr
-			if select_app_type = 2 : applicant_quick_application(select_q_appX)     = refstr
+			if buttonN =  7 {
+				if select_app_type = 1 : applicant_applicationA(select_appY,select_appX) = refstr
+				if select_app_type = 2 : applicant_quick_applicationA(select_q_appX)     = refstr
+			status = "ファイルパスAを選択した！"
+			}
+			if buttonN =  9 {
+				if select_app_type = 1 : applicant_applicationB(select_appY,select_appX) = refstr
+				if select_app_type = 2 : applicant_quick_applicationB(select_q_appX)     = refstr
+			status = "ファイルパスBを選択した！"
+			}
 			gosub *drawObject
-			status = "ファイルパスを選択した！"
 		}
 	} else {
 		status = "対象が選択されていない！"
@@ -254,10 +279,18 @@ goto *Main
 ; ファイルパスを確定
 *confirmFileP
 	if select_app_type != 0 {
-		if select_app_type = 1 : application(select_appY,select_appX) = applicant_application(select_appY,select_appX)
-		if select_app_type = 2 : quick_application(select_q_appX)     = applicant_quick_application(select_q_appX)
+	buttonN = stat
+		if buttonN =  8 {
+			if select_app_type = 1 : applicationA(select_appY,select_appX) = applicant_applicationA(select_appY,select_appX)
+			if select_app_type = 2 : quick_applicationA(select_q_appX)     = applicant_quick_applicationA(select_q_appX)
+		status = "ファイルパスAを変更した！"
+		}
+		if buttonN = 10 {
+			if select_app_type = 1 : applicationB(select_appY,select_appX) = applicant_applicationB(select_appY,select_appX)
+			if select_app_type = 2 : quick_applicationB(select_q_appX)     = applicant_quick_applicationB(select_q_appX)
+		status = "ファイルパスBを変更した！"
+		}
 		gosub *drawObject
-		status = "ファイルパスを変更した！"
 	} else {
 		status = "対象が選択されていない！"
 	}
@@ -284,9 +317,9 @@ goto *Main
 					PicY = ginfo_winy
 					gsel 0
 			}
+			status = "画像を選択した！"
 			gosub *drawImage
 			gosub *drawObject
-			status = "画像を選択した！"
 		}
 	} else {
 		status = "対象が選択されていない！"

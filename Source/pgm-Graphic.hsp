@@ -100,7 +100,7 @@ return
 	}
 	; スマートモード
 	setButtonA 600,144 ,  60, 16
-	setDisplayLampA   588,148 , smartmode
+	setDisplayLampA      588,148 , smartmode
 	if action = 1 {
 		switch smartmode
 			case 0 : smartmode = 1 : swbreak
@@ -121,20 +121,20 @@ return
 	}
 	; リピート
 	setButtonB 448,172 ,  60, 24 , playmode_repeat
-	setDisplayLampB   496,180 , playmode_repeat
+	setDisplayLampB      496,180 , playmode_repeat
 	if action = 1 {
 		switch playmode_repeat
 			case 0 : playmode_repeat = 1 : swbreak
 			case 1 : playmode_repeat = 0 : swbreak
 		swend
 	}
-	; フェード
-	setButtonB 512,172 ,  60, 24 , playmode_fade
-	setDisplayLampB   560,180 , playmode_fade
+	; コンテニュー
+	setButtonB 512,172 ,  60, 24 , playmode_continue
+	setDisplayLampB      560,180 , playmode_continue
 	if action = 1 {
-		switch playmode_fade
-			case 0 : playmode_fade = 1 : swbreak
-			case 1 : playmode_fade = 0 : swbreak
+		switch playmode_continue
+			case 0 : playmode_continue = 1 : swbreak
+			case 1 : playmode_continue = 0 : swbreak
 		swend
 	}
 	MP3State

@@ -31,6 +31,7 @@ music_vol_balance                = 50.00 ; [%] 音量バランス
 music_mute                       =     0 ; 0:ミュートオフ / 1:ミュートオン
 playmode_shuffle                 =     0 ; 0:通常再生 / 1:音楽をシャッフル再生
 playmode_repeat                  =     0 ; 0:通常再生 / 1:同じ音楽をリピート再生
+playmode_continue                =     0 ; 0:単発で再生 / 1:連続で再生
 seek_speed                       =     2 ; シークの速度
 ; 初期変数
 sdim music_folderP     , 128
@@ -369,7 +370,7 @@ return
 return
 ; 次の音楽へ(自動)
 *autorunNextMusic
-	if music_fileN = music_fileI {
+	if music_fileN = music_fileI | playmode_continue = 0 {
 		music_play  = 0
 		music_pause = 0
 	}

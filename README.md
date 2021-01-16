@@ -17,8 +17,8 @@
 
 ## ダウンロード
 
-- [Desk Deck 最新版](https://github.com/SomethingOnu/DeskDeck/releases/download/1.0.0/Desk_Deck_1.0.0.zip)
-- [Desk Deck 最新版 (ソース)](https://github.com/SomethingOnu/DeskDeck/archive/1.0.0.zip)
+- [Desk Deck 最新版](https://github.com/SomethingOnu/DeskDeck/releases/download/1.1.0/Desk_Deck_1.1.0.zip)
+- [Desk Deck 最新版 (ソース)](https://github.com/SomethingOnu/DeskDeck/archive/1.1.0.zip)
 
 
 
@@ -44,7 +44,6 @@
 
 ## 一時的なお知らせ
 
-- `フェード機能`が未実装です。
 - `バス(低音)調整`・`トレブル(高音)調整`が未実装です。
 - `サウンドビジュアライザー`が未実装です。
 
@@ -59,10 +58,10 @@
 
 ## クレジット
 
-- Icon by Icons8 (https://icons8.jp/)
-- KexMP3 by (C) 1999 KLAUS (http://www5b.biglobe.ne.jp/~klaus/klaus_soft/DLLforHSP.html#KexMP3_DLL)
-- KexWin by (C) 1999 KLAUS (http://www5b.biglobe.ne.jp/~klaus/klaus_soft/DLLforHSP.html#KexWin_DLL)
-- mp3infp by (C) 1998-2009 T-Matsuo (http://www.win32lab.com/fsw/mp3infp/)
+- Icon by [Icons8](https://icons8.jp/)
+- [KexMP3](http://www5b.biglobe.ne.jp/~klaus/klaus_soft/DLLforHSP.html#KexMP3_DLL) by (C) 1999 KLAUS
+- [KexWin](http://www5b.biglobe.ne.jp/~klaus/klaus_soft/DLLforHSP.html#KexWin_DLL) by (C) 1999 KLAUS
+- [mp3infp](http://www.win32lab.com/fsw/mp3infp/) by (C) 1998-2009 T-Matsuo
 
 
 
