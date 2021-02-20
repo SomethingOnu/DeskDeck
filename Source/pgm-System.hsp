@@ -47,22 +47,26 @@ return
 			}
 		}
 		if app_type = 1 {
-			exist quick_applicationA(memory_q_appX)
-			if strsize != -1 {
-				exec quick_applicationA(memory_q_appX) , 16
-			} else {
-				exist quick_applicationB(memory_q_appX)
-				if strsize != -1 {
-					exec quick_applicationB(memory_q_appX) , 16
-				} else {
-					dialog "["+memory_q_appX+"]\nファイルが存在しません！" , 1 , "起動エラー"
-				}
-			}
+			exec quick_applicationA(memory_q_appX) , 16
 		}
 	} else {
 		dialog "["+memory_q_appX+"]\nパスが空白です！" , 1 , "起動エラー"
 	}
 	action = 0
+return
+; 最新動作の確認
+*checkSystemUpdate
+	if system_update = 0 {
+		if low_fps = 0 { system_update_count += 1 } else { system_update_count += 4 }
+		if system_update_count >= 60 {
+			system_update = 1
+			system_update_count = 0
+		}
+	} else {
+		system_update_count = 0
+	}
+	if system_update = 2 : system_update = 0
+	if system_update = 1 : system_update = 2
 return
 ; 設定を保存して終了
 *offPowerA

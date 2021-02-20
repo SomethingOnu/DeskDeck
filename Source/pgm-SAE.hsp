@@ -11,7 +11,7 @@ chdir dirP
 ; ÉfÅ[É^
 *Reset
 title_name = "Desk Deck (Set Application Editor)"
-version = "1.1.0"
+version = "1.2.0"
 #packopt name "Desk Deck (Set Application Editor)"
 #packopt icon "bin-IconSAE.ico"
 #pack "pgm-SAE.hsp"

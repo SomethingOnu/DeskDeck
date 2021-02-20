@@ -17,8 +17,8 @@
 
 ## ダウンロード
 
-- [Desk Deck 最新版](https://github.com/SomethingOnu/DeskDeck/releases/download/1.1.0/Desk_Deck_1.1.0.zip)
-- [Desk Deck 最新版 (ソース)](https://github.com/SomethingOnu/DeskDeck/archive/1.1.0.zip)
+- [Desk Deck 最新版](https://github.com/SomethingOnu/DeskDeck/releases/download/1.2.0/Desk_Deck_1.2.0.zip)
+- [Desk Deck 最新版 (ソース)](https://github.com/SomethingOnu/DeskDeck/archive/1.2.0.zip)
 
 
 

@@ -441,7 +441,7 @@ return
 		noteadd "Quick Application A (3) = " + quick_applicationA(3) , nl , 1 : nl += 1
 		noteadd "                  B (3) = " + quick_applicationB(3) , nl , 1
 		notesave configP
-		bgscr 10 , winX,winY-128 , 0 , posX,posY
+		bgscr 10 , winX,winY-152 , 0 , posX,posY
 		title "" + title_name + " (Saving)"
 		gsel 10
 			pos x,y

@@ -8,10 +8,11 @@ if path_mode = 1 {
 	dirP = dir_exe
 }
 chdir dirP
+#define setupLog(%1,%2) pos 16,16+12*%1 : color 0,0,0 : mes %2
 ; データ
 *Reset
 title_name = "Desk Deck"
-version = "1.1.0"
+version = "1.2.0"
 #packopt name "Desk Deck"
 #packopt icon "bin-IconDD.ico"
 #pack "pgm-Main.hsp"
@@ -25,34 +26,75 @@ posX = (ginfo_dispx-winX)-8
 posY = (ginfo_dispy-winY)-taskbarH
 bgscr 0 , winX,winY , 8 , posX,posY
 title "" + title_name + " " + version
-font font_main , 16
+font font_main , 12
 setup = 1
-#include "shell32.as"
-#include "Mod/mod-waitFPS.hsp"
-#include "Mod/mod-getActiveWindow.hsp"
-#include "Mod/mod-getCPU.hsp"
-#include "Mod/mod-getClock.hsp"
-#include "Mod/mod-transparentBackground.hsp"
-#include "Mod/mod-makeRGBA.hsp"
-#include "Mod/mod-dropFile.hsp"
-#include "Mod/mod-playMP3.hsp"
-#include "Mod/mod-generateRandomString.hsp"
-#include "Mod/mod-autosetIndention.hsp"
-#include "Mod/mod-testGDI+.hsp"
+setupLog  0,"Desk Deck " + version + " (https://github.com/SomethingOnu/DeskDeck)"
+setupLog  1,"    Created by Something Onu (https://somethingonu.github.io)"
+setupLog  2,""
+setupLog  3,"Loading Software Data..."
+setupLog  4,"Loading > shell32.as"
+             #include "shell32.as"
+setupLog  5,"Loading > mod-waitFPS.hsp"
+         #include "Mod/mod-waitFPS.hsp"
+setupLog  6,"Loading > mod-getActiveWindow.hsp"
+         #include "Mod/mod-getActiveWindow.hsp"
+setupLog  7,"Loading > mod-getCPU.hsp"
+         #include "Mod/mod-getCPU.hsp"
+setupLog  8,"Loading > mod-getClock.hsp"
+         #include "Mod/mod-getClock.hsp"
+setupLog  9,"Loading > mod-transparentBackground.hsp"
+         #include "Mod/mod-transparentBackground.hsp"
+setupLog 10,"Loading > mod-makeRGBA.hsp"
+         #include "Mod/mod-makeRGBA.hsp"
+setupLog 11,"Loading > mod-dropFile.hsp"
+         #include "Mod/mod-dropFile.hsp"
+setupLog 12,"Loading > mod-playMP3.hsp"
+         #include "Mod/mod-playMP3.hsp"
+setupLog 13,"Loading > mod-generateRandomString.hsp"
+         #include "Mod/mod-generateRandomString.hsp"
+setupLog 14,"Loading > mod-autosetIndention.hsp"
+         #include "Mod/mod-autosetIndention.hsp"
+setupLog 15,"Loading > mod-testGDI+.hsp"
+         #include "Mod/mod-testGDI+.hsp"
 ; 初期変数
 break_mode = 0
+system_update = 2
 ; コンフィグ
-#include "pgm-Config.hsp"
+setupLog 16,"Loading > pgm-Config.hsp"
+             #include "pgm-Config.hsp"
 gosub *checkConfig
 gosub *loadConfigA
 ; 設定
-#include "pgm-Graphic.hsp"
-#include "pgm-System.hsp"
-#include "pgm-inputKey.hsp"
-#include "pgm-Test.hsp"
+setupLog 17,"Loading > pgm-Graphic.hsp"
+             #include "pgm-Graphic.hsp"
+setupLog 18,"Loading > pgm-System.hsp"
+             #include "pgm-System.hsp"
+setupLog 19,"Loading > pgm-inputKey.hsp"
+             #include "pgm-inputKey.hsp"
+setupLog 20,"Loading > pgm-Test.hsp"
+             #include "pgm-Test.hsp"
 gosub *addMusicFile
-; ルート
+; 初期描画
 setup = 0
+setupLog 21,"Drawing Graphics..."
+*drawFirstMain
+	redraw 0
+	color 0,0,0 : boxf
+	gosub *drawMain
+	gosub *transparentBackground
+	gosub *drawButton
+	gosub *calcTime
+	gosub *drawClock
+	gosub *drawDisplayA
+	gosub *drawDisplayB
+	gosub *drawDisplayLamp
+
+	setButtonA 8,8 , 40,40 ; 電源
+	if action = 1 : goto *offPowerA
+
+	redraw 1
+goto *Main
+; ルート
 *Main
 	redraw 0
 	ThreadId = GetWindowThreadProcessId(WindowFromPoint(ginfo_mx,ginfo_my),ProcessId)
@@ -65,13 +107,14 @@ setup = 0
 	}
 	if memory_run_app   = 1 : gosub *runApplication
 	if memory_run_q_app = 1 : gosub *runQuickApplication
-	color 0,0,0 : boxf
-	gosub *drawMain
-	gosub *transparentBackground
 	gosub *drawButton
-	gosub *drawClock
-	gosub *drawDisplayA
+	gosub *calcTime
+	if tick_update = 1 | system_update = 2 {
+		gosub *drawClock
+		gosub *drawDisplayA
+	}
 	gosub *drawDisplayB
+	gosub *drawDisplayLamp
 	if menu_switch = 1 : gosub *drawMenu
 	if test_key = 1 : gosub *checkTestKey
 	gosub *moveWindow
@@ -84,4 +127,5 @@ setup = 0
 	onexit  *offPowerA
 	onerror *offPowerB
 	redraw 1
+	gosub *checkSystemUpdate
 goto *Main
